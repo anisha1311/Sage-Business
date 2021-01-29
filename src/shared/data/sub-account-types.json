@@ -1,0 +1,152 @@
+[
+    {
+        "value": "1",
+        "name": "bank",
+        "classification": "asset"
+    },
+    {
+        "value": "2",
+        "name": "accounts receivable",
+        "classification": "asset"
+    },
+    {
+        "value": "3",
+        "name": "other current asset",
+        "classification": "asset"
+    },
+    {
+        "value": "4",
+        "name": "other asset",
+        "classification": "asset"
+    },
+    {
+        "value": "5",
+        "name": "fixed asset",
+        "classification": "asset"
+    },
+    {
+        "value": "6",
+        "name": "credit card",
+        "classification": "liability"
+    },
+    {
+        "value": "7",
+        "name": "accounts payable",
+        "classification": "liability"
+    },
+    {
+        "value": "8",
+        "name": "other current liability",
+        "classification": "liability"
+    },
+    {
+        "value": "9",
+        "name": "long term liability",
+        "classification": "liability"
+    },
+    {
+        "value": "10",
+        "name": "equity",
+        "classification": "equity"
+    },
+    {
+        "value": "11",
+        "name": "cost of goods sold",
+        "classification": "expense"
+    },
+    {
+        "value": "12",
+        "name": "expense",
+        "classification": "expense"
+    },
+    {
+        "value": "13",
+        "name": "other expense",
+        "classification": "expense"
+    },
+    {
+        "value": "14",
+        "name": "income",
+        "classification": "income"
+    },
+    {
+        "value": "15",
+        "name": "other income",
+        "classification": "income"
+    },
+    {
+        "value": "16",
+        "name": "general & administrative",
+        "classification": "expense"
+    },
+    {
+        "value": "17",
+        "name": "advertising & selling",
+        "classification": "expense"
+    },
+    {
+        "value": "18",
+        "name": "payroll & taxes",
+        "classification": "expense"
+    },
+    {
+        "value": "19",
+        "name": "employee benefits",
+        "classification": "expense"
+    },
+    {
+        "value": "20",
+        "name": "overhead",
+        "classification": "expense"
+    },
+    {
+        "value": "21",
+        "name": "office supplies & utilities",
+        "classification": "expense"
+    },
+    {
+        "value": "22",
+        "name": "finance charge",
+        "classification": "expense"
+    },
+    {
+        "value": "23",
+        "name": "consultant & professional fees",
+        "classification": "expense"
+    },
+    {
+        "value": "24",
+        "name": "repair & maintenance",
+        "classification": "expense"
+    },
+    {
+        "value": "25",
+        "name": "travel & training",
+        "classification": "expense"
+    },
+    {
+        "value": "26",
+        "name": "other expense",
+        "classification": "expense"
+    },
+    {
+        "value": "27",
+        "name": "service income",
+        "classification": "income"
+    },
+    {
+        "value": "28",
+        "name": "sales of product income",
+        "classification": "income"
+    },
+    {
+        "value": "29",
+        "name": "other income",
+        "classification": "income"
+    },
+    {
+        "value": "30",
+        "name": "gain/loss on sale",
+        "classification": "income"
+    }
+]
