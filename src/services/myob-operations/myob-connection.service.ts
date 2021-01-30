@@ -18,6 +18,7 @@ const grant_type = process.env.MYOB_GRANT_TYPE;
 const redirect_uri = process.env.MYOB_CALLBACK_URL;
 const scope = process.env.MYOB_SCOPE;
 const client_secret = process.env.MYOB_CLIENT_SECRETE;
+const authorizationUrl = process.env.authorizationUrl;
 let apisvc = new CommanAPIService();
 const headervalues :any = { 
 	'Content-Type': 'application/x-www-form-urlencoded'

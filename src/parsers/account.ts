@@ -41,14 +41,14 @@ export class ChartOfAccountParser {
     parse(account: any, businessId: string) {
         let parseData = {
             'businessId': businessId,
-            'platformAccountId': account.Id,
-            'name': account.FullyQualifiedName,
-            'accountSubType': this.getAccountType(account.AccountType, account.AccountSubType),
-            'parentAccountName': account.AccountType,
+            'platformAccountId': account.UID,
+            'name': account.Name,
+            'accountSubType': account.Type,
+            'parentAccountName': account.ParentAccount!== null? this.getAccountType(account.ParentAccount.Name): '',
             'classification': account.Classification,
-            'active': account.Active,
-            'accountNumber': account.AcctNum,
-            'parentAccountId': this.getParentOrCategoryAccountId(account.AccountType)
+            'active': account.IsActive,
+            'accountNumber': account.BankingDetails !== null? account.BankingDetails.BankAccountNumber:'',
+            'parentAccountId': account.ParentAccount!== null? this.getParentOrCategoryAccountId(account.AccountType): ''
         }
 
         return parseData;
@@ -59,9 +59,9 @@ export class ChartOfAccountParser {
      * @param accountType 
      * @param accountSubType 
      */
-    getAccountType(accountType: string, accountSubType: string) {
+    getAccountType(accountType: string) {
         if (accountType === ChartOfAccountKeys.income || accountType === ChartOfAccountKeys.expense) {
-            return this.findSubAccountType(accountType === ChartOfAccountKeys.income, accountSubType)
+            return this.findSubAccountType(accountType === ChartOfAccountKeys.income, accountType)
         }
         else {
             return this.getParentOrCategoryAccountId(accountType);

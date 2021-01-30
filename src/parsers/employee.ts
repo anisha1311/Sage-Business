@@ -4,27 +4,28 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
-export class ContactParser {
+export class EmployeeParser {
+
     /**
      * will parse the Customers
-     * @param vendorInfo 
+     * @param customerInfo 
      * @param businessId 
      */
-     public parseContact(contactInfo: any, businessId: string) {
+     public parseEmployee(employeeInfo: any, businessId: string) {
         try {
-            let parsedContacts: any = [];
-            let length = contactInfo.Items.length || 0;
+            let parsedEmployees: any = [];
+            let length = employeeInfo.Items.length || 0;
             console.log('length', length);
-            if (contactInfo && length > 0) {
-                let parsedContacts: any = [];
+            if (employeeInfo && length > 0) {
+                let parsedEmployees: any = [];
                 for (let i = 0; i < length; i++) {
-                    const contact = contactInfo.Items[i];
-                    parsedContacts.push(this.parse(contact, businessId))
+                    const employee = employeeInfo.Items[i];
+                    parsedEmployees.push(this.parse(employee, businessId))
                 }                
-                return parsedContacts;
+                return parsedEmployees;
             }
             else {
-                 return parsedContacts;
+                 return parsedEmployees;
                 //logger.info("No Customers")
             }
         } catch (error) {
@@ -34,20 +35,20 @@ export class ContactParser {
     }
 
     /**
-     * Parse the COA
+     * Parse the Customer
      * @param account 
      * @param businessId 
      */
-    parse(contact: any, businessId: string) {
+    parse(employee: any, businessId: string) {
         let parseData = {
+
             "businessId" : businessId,
-            "contactName" : contact.FirstName + ' ' + contact.LastName,    
+            "contactName" : employee.FirstName + ' ' + employee.LastName,    
             "isSupplier" : 'false',
             "isCustomer" : 'false',
-            "isEmployee" : 'false',
-            "isIndividual" : contact.IsIndividual,
-            "active" : contact.IsActive,
-            "platformContactId" : contact.UID,
+            "isEmployee" : 'true',
+            "active" : employee.IsActive,
+            "platformContactId" : employee.UID,
             "contactAddress" : [],
             "contactPhone" : [],
         }

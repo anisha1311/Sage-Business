@@ -3,7 +3,8 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import axios from 'axios';
 
-const clientId =  process.env.MYOB_CLIENT_ID;
+const clientId:any =  process.env.MYOB_CLIENT_ID;
+const API_URL :any =  process.env.MYOB_API_URL;
 export class QuickbooksDataReaderService {
     /**
      *  will return list of preferences
@@ -12,11 +13,10 @@ export class QuickbooksDataReaderService {
     async getCompanyInfo(token: string): Promise<any> {
         console.log('**********getCompanyInfo***********')
         try {
-            let url = Constant.urlConstant.myobUrl.accountRight
+            let url = Constant.urlConstant.myobUrl.accountRight;
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            console.log('response--', response.data);
             if (response) {
                return response.data;
             }
@@ -71,6 +71,8 @@ export class QuickbooksDataReaderService {
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
             if (response) {
                return response.data;
             }
@@ -78,9 +80,117 @@ export class QuickbooksDataReaderService {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
+            console.log('error', error);
             throw error
         }
     }
+
+    async getAllEmployees(token: string, Uri: string): Promise<any> {
+        console.log('**********getAllEmployees***********')
+        try {
+            let url = Uri+'/Contact/Employee';
+            console.log('url--', url);
+            // Make qbo api call
+            let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
+            if (response) {
+               return response.data;
+            }
+            else {
+                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
+    async getAllAccounts(token: string, Uri: string): Promise<any> {
+        console.log('**********getAllAccounts***********')
+        try {
+            let url = Uri+'/GeneralLedger/Account';
+            console.log('url--', url);
+            // Make qbo api call
+            let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
+            if (response) {
+               return response.data;
+            }
+            else {
+                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
+    async getAllItems(token: string, Uri: string): Promise<any> {
+        console.log('**********getAllItems***********')
+        try {
+            let url = Uri+'/Inventory/Item';
+            console.log('url--', url);
+            // Make qbo api call
+            let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
+            if (response) {
+               return response.data;
+            }
+            else {
+                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
+    
+    async getAllInvoices(token: string, Uri: string): Promise<any> {
+        console.log('**********getAllInvoices***********')
+        try {
+            let url = Uri+'/Sale/Invoice';
+            console.log('url--', url);
+            // Make qbo api call
+            let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
+            if (response) {
+               return response.data;
+            }
+            else {
+                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
+    async getAllBills(token: string, Uri: string): Promise<any> {
+        console.log('**********getAllBills***********')
+        try {
+            let url = Uri+'/Purchase/Bill';
+            console.log('url--', url);
+            // Make qbo api call
+            let response:any = await this.makeApiCall(url, token);
+            console.log('response->>',response.data);
+            
+            if (response) {
+               return response.data;
+            }
+            else {
+                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
 
     /** Make Api Call */
     makeApiCall(urlString: string, token:string) {
@@ -91,7 +201,7 @@ export class QuickbooksDataReaderService {
                     url: urlString,
                     method: 'GET',
                     headers: {
-                        'x-myobapi-key': 'k896h2eerjhm2h3gvghrpran',
+                        'x-myobapi-key': clientId,
                         'x-myobapi-version': 'v2',
                         'Accept-Encoding': 'gzip,deflate',
                         'Authorization': 'Bearer '+token

@@ -52,21 +52,20 @@ const router = Router();
  *            type: object
  *            description: any error.
  */
-    router.get('/', async (req: Request, res: Response) => {
-        console.log('authUri');
-      //  try {
-            // To get connection url from QB
-            const authUri = await quickbookConnectionService.getConnectURL();
-            res.redirect(authUri);
-            /*let response = {
-                url: authUri,
-            };*/
-         //   return res.status(OK).json({ status: true, data: response, message: Constant.qbResMsg.connectionUrl });
-       // } catch (error) {
-         //   console.log('66');
-       //   //  return res.status(INTERNAL_SERVER_ERROR).json({ status: false, error: error, message: Constant.commanResMsg.somethingWentWrong });
-    //    }
-});
+        router.get('/', async (req: Request, res: Response) => {
+        // router.get('/connection-url', async (req: Request, res: Response) => {
+                try {
+                    // To get connection url from myob
+                    const authUri = await quickbookConnectionService.getConnectURL();
+                    res.redirect(authUri);
+                    let response = {
+                        url: authUri,
+                    };
+                    return res.status(OK).json({ status: true, data: response, message: Constant.qbResMsg.connectionUrl });
+                } catch (error) {
+                return res.status(INTERNAL_SERVER_ERROR).json({ status: false, error: error, message: Constant.commanResMsg.somethingWentWrong });
+            }
+        });
 
 /*
  * @swagger
@@ -134,9 +133,7 @@ const router = Router();
  *            description: any error.
  */
 router.get('/login/callback', async (req: Request, res: Response) => {
-    console.log('inside login callback');
-    console.log('req.query', req.query);
-    
+    //router.get('/callback', async (req: Request, res: Response) => {
     try {
         // Validate the request model
         let validationResponse = ConnectBusinessSchema.validate(req.query);
@@ -148,13 +145,15 @@ router.get('/login/callback', async (req: Request, res: Response) => {
         let buff = Buffer.from(code);
         const buffString:any = buff.toString('ascii');
         const callbackString:any = buffString.replace(/\s+/g,'');
-
         console.log('Access_Code--', callbackString);
-        let timezone = TimeZone.default;
+
+       //** const callbackString = stringFormat(Constant.urlConstant.QbUrl.callback, [req.query.state.toString(), req.query.code.toString()]);
+       //** let timezone = TimeZone.default;
         // This function is for testing purpose so static id is passed as an argument intentionally. User id static for testing purpose
+       //** let response = await smaiBusinessService.saveBusiness(callbackString, req.query.realmId.toString(), '5ec3c065576369c522453c0c', timezone);
         let response = await smaiBusinessService.saveBusiness(callbackString);
-        console.log('response--', response);
         res.status(OK).json(response);
+
     } catch (error) {
         try {
             logger.error(error);
@@ -232,8 +231,8 @@ router.post('/connect-business', async (req: Request, res: Response) => {
         // Prepare the callback string
         const callbackString = stringFormat(Constant.urlConstant.QbUrl.callback, [req.body.state.toString(), req.body.code.toString()]);
         // calling service to save business
-       // let response = await smaiBusinessService.saveBusiness(callbackString, req.body.realmId.toString(), req.body.userId.toString(), req.body.timezone.toString());
-       // res.status(OK).json(response);
+       //** let response = await smaiBusinessService.saveBusiness(callbackString, req.body.realmId.toString(), req.body.userId.toString(), req.body.timezone.toString());
+       //** res.status(OK).json(response);
     } catch (error) {
         try {
             logger.error('Unable to connect company:');

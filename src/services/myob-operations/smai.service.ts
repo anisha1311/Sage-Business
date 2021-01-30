@@ -3,6 +3,10 @@ import { CustomerParser } from 'src/parsers/customer';
 import { CompanyParser } from 'src/parsers/company';
 import { VendorParser } from 'src/parsers/vendor';
 import { ContactParser } from 'src/parsers/contact';
+import { ItemParser } from 'src/parsers/item';
+import { InvoiceParser } from 'src/parsers/invoice';
+import { BillParser } from 'src/parsers/bill';
+import { EmployeeParser } from 'src/parsers/employee';
 import { QuickbooksConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { QuickbooksDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import { AccessTokenParser } from 'src/parsers/access-tokens';
@@ -43,23 +47,15 @@ export class SmaiBusinessService {
         try {
             // Get access token from myob
             const accessTokens = await quickbookConnectionService.getTokens(callbackString);
-
+           console.log('accessTokens', accessTokens);
+           
             // Fetch companies to get the businessId
-            let companyInfo = await quickbooksDataReaderService.getCompanyInfo( accessTokens.access_token);
-            
-            const companyData:any=[];
-            for(var index=0; index<companyInfo.length; index++){
-                var company:any = {};                
-                company['Id'] = companyInfo[index].Id;
-                company['Name'] = companyInfo[index].Name;
-                company['Uri'] = companyInfo[index].Uri;
-                companyData.push(company);
-            }
-            console.log('companyData', companyData);
+            let companyInfo = await quickbooksDataReaderService.getCompanyInfo(accessTokens.access_token);
           
             // Fetch company information
-            for(var index=0; index<companyData.length;index++){
-                this.saveCompanyData(accessTokens.access_token, companyData[index].Uri, companyData[index].Id);
+            for(var index=0; index<companyInfo.length;index++){
+                console.log('realmId >>', companyInfo[index].Id);
+                this.saveCompanyData(accessTokens.access_token, companyInfo[index].Uri, companyInfo[index].Id);
              }
             
          
@@ -74,10 +70,14 @@ export class SmaiBusinessService {
      * @param businessId 
      * @param calloutUri 
      */
-    saveCompanyData(accessToken: string, calloutUri: string, businessId: string) {
-        this.saveCustomers(accessToken, calloutUri, businessId);
-        this.saveVendors(accessToken, calloutUri, businessId);
-        this.saveContacts(accessToken, calloutUri, businessId);
+    saveCompanyData(accessToken: string, calloutUri: string, businessId: string) {        
+         this.saveCustomers(accessToken, calloutUri, businessId);
+         this.saveVendors(accessToken, calloutUri, businessId);
+         this.saveContacts(accessToken, calloutUri, businessId);
+         this.saveEmployees(accessToken, calloutUri, businessId);
+         this.saveAccounts(accessToken, calloutUri, businessId);
+         this.saveItems(accessToken, calloutUri, businessId);
+         this.saveInvoices(accessToken, calloutUri, businessId);
     }
  
     /**
@@ -124,10 +124,10 @@ export class SmaiBusinessService {
                 console.log('parsedVendors', parsedVendors);
                 
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedVendors);
-                logger.info("Suppliers Fetched: businessId: " + businessId)
+                logger.info("Vendors Fetched: businessId: " + businessId)
             }
         } catch (error) {
-            logger.error("Suppliers Failed:-" + error);
+            logger.error("Vendors Failed:-" + error);
         }
     }
 
@@ -156,15 +156,139 @@ export class SmaiBusinessService {
         }
     }
 
+       /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveEmployees(accessToken: string, calloutUri: string, businessId:string) {
+        try {
+            let allCustomers: any[] = [];
+            // Call myob api to fetch customers
+            let employees = await quickbooksDataReaderService.getAllEmployees(accessToken, calloutUri);
+            console.log('employees', employees);
+
+            if (employees) {
+                let parsedEmployees = new EmployeeParser().parseEmployee(employees, businessId);
+                console.log('parsedEmployees', parsedEmployees);
+                
+                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedEmployees);
+                logger.info("Employees Fetched: businessId: " + businessId)
+            }
+        } catch (error) {
+            logger.error("Employees Failed:-" + error);
+        }
+    }
+
+      /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveAccounts(accessToken: string, calloutUri: string, businessId:string) {
+        try {
+            let allCustomers: any[] = [];
+            // Call myob api to fetch customers
+            let accounts = await quickbooksDataReaderService.getAllAccounts(accessToken, calloutUri);
+            console.log('accounts', accounts);
+
+            if (accounts) {
+                let parsedAccounts = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
+                console.log('parsedAccounts', parsedAccounts);
+                
+                this.prepareAndSendQueueData(EntityType.account, OperationType.CREATE, businessId, parsedAccounts);
+                logger.info("Accounts Fetched: businessId: " + businessId)
+            }
+        } catch (error) {
+            logger.error("Accounts Failed:-" + error);
+        }
+    }
+
+      /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveItems(accessToken: string, calloutUri: string, businessId:string) {
+        try {
+            let allCustomers: any[] = [];
+            // Call myob api to fetch customers
+            let items = await quickbooksDataReaderService.getAllItems(accessToken, calloutUri);
+            console.log('items', items);
+
+            if (items) {
+                let parsedItems = new ItemParser().parseItem(items, businessId);
+                console.log('parsedItems', parsedItems);
+                
+                this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItems);
+                logger.info("Items Fetched: businessId: " + businessId)
+            }
+        } catch (error) {
+            logger.error("Items Failed:-" + error);
+        }
+    }
+
+      /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveInvoices(accessToken: string, calloutUri: string, businessId:string) {
+        try {
+            let allCustomers: any[] = [];
+            // Call myob api to fetch customers
+            let Invoices = await quickbooksDataReaderService.getAllInvoices(accessToken, calloutUri);
+            console.log('Invoices', Invoices);
+
+            if (Invoices) {
+                let parsedInvoices = new InvoiceParser().parseInvoice(Invoices, businessId);
+                console.log('parsedInvoices', parsedInvoices);
+                
+                this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoices);
+                logger.info("Invoices Fetched: businessId: " + businessId)
+            }
+        } catch (error) {
+            logger.error("Invoices Failed:-" + error);
+        }
+    }
+
+       /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveBills(accessToken: string, calloutUri: string, businessId:string) {
+        try {
+            let allCustomers: any[] = [];
+            // Call myob api to fetch customers
+            let bills = await quickbooksDataReaderService.getAllBills(accessToken, calloutUri);
+            console.log('bills', bills);
+
+            if (bills) {
+                let parsedBills = new BillParser().parseBill(bills, businessId);
+                console.log('parsedBills', parsedBills);
+                
+                this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedBills);
+                logger.info("Bills Fetched: businessId: " + businessId)
+            }
+        } catch (error) {
+            logger.error("Bills Failed:-" + error);
+        }
+    }
+
+
 
     /** Will Prepare and send data to queue
      * @param CONTACT 
      * @param CREATE 
      * @param parsedContacts 
      */
-    prepareAndSendQueueData(entityType: EntityType, operationType: OperationType, businessId: string, data: []) {
-        console.log('prepareAndSendQueueData');
-        
+    prepareAndSendQueueData(entityType: EntityType, operationType: OperationType, businessId: string, data: []) {        
         if (data && data.length == 0) {
             if (entityType === EntityType.jv || entityType === EntityType.transactions) {
                 data = []

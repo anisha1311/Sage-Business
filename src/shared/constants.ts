@@ -88,7 +88,7 @@ export const Constant = {
             misDisconnectBusiness: process.env.MIS_SERVICE_URL + '/api/report/business/{0}/disconnect',
             login: process.env.AUTH_BASE_URL + '/api/users/login',
         },
-        myobUrl : {
+        myobUrl : {            
             accountRight: process.env.MYOB_API_URL + '/accountright',
         }
     },
