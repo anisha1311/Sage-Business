@@ -40,21 +40,43 @@ export class BillParser {
      * @param businessId 
      */
     parse(bill: any, businessId: string) {
+        let billDate : any;
+        let promiseDate : any;
+        var lines: any = [];
+        if(bill.Date!==null){
+            billDate = bill.Date.split('-');
+        }
+        if(bill.PromisedDate !==null){
+            promiseDate = bill.PromisedDate.split('-');
+        }
+
+        for (var i = 0; i<bill.Lines.length; i++) {
+            var line: any = {};
+            line['description'] =  bill.Lines[i].Description          
+            line['itemId'] = bill.Lines[i].Item.UID;               
+            line['lineNumber'] = bill.Lines[i].Item.Number;  
+            line['lineAmount'] = bill.Lines[i].CostOfGoodsSold;     
+            line['quantity'] = bill.Lines[i].ShipQuantity;  
+            line['accountCode'] = '1';
+            lines.push(line);
+        }
+
+
         let parseData = {
             "number" : bill.Number,
-            "date" : bill.Date,
-            "dueDate" :  bill.PromisedDate,
-            "shipDate" :  '',
-            "trackingNo" :  '',
-            "contactID" : bill.Customer!== null ?  bill.Customer.UID : '', 
-            "totalLineItem" :  '',
-            "lineAmountType" :  '',
+            "date" :  '01-09-2021',//billDate[1]+'-' + billDate[2].substring(0,2) + '-' + billDate[0],  ,
+            "dueDate" :  '01-09-2021',// promiseDate,
+            "shipDate" :  '01-09-2021', //hardcoded
+            "trackingNo" :   '23456789', //hardcoded
+            "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
+            "totalLineItem" :  '2', //hardcoded
+            "lineAmountType" :  '2', //hardcoded
             "amount" :  bill.TotalAmount,
             "balance" :  bill.BalanceDueAmount,
             "totalTax" : bill.TotalTax,
             "platformId" :  bill.UID,
             "type" :  '2', ///NEED TO CHECK once again
-            "lines" :  '',
+            "lines" :  lines
         }
 
         return parseData;

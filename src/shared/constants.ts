@@ -41,7 +41,7 @@ export const Constant = {
         rabbitMQRecieverConn: 'receiver-connection',
         rabbitMQSenderConn: 'sender-connection',
         accessTokenLeastMinutes: 4,
-        smaiQbService: 'smai-qb-service',
+        smaiQbService: 'smai-myob-service',
         smaiBusinessService: 'smai-business-service',
         emptyQueueName: 'Empty data or new name Supplied',
         smaiClientGateway: 'smai-client-gateway',
@@ -75,7 +75,7 @@ export const Constant = {
 
         },
         serviceUrl: {
-            businessUrl: process.env.SMAIBaseUrl + '/api/business/add',
+            businessUrl: process.env.SMAIBaseUrl + '/business/',
             accessTokenUrl: process.env.SMAIBaseUrl + '/api/credentials/realmid/{0}',
             coaUrl: process.env.SMAIBaseUrl + '/api/chartofaccounts/{0}',
             credentialInfo: process.env.SMAIBaseUrl + '/api/credentials',

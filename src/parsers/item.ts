@@ -44,12 +44,14 @@ export class ItemParser {
             "businessId" : businessId,
             "platformId" : item.UID,
             "name" :  item.Name,
-            "type" :  null,
+            "type" :  ' ',
             "fullName" :  item.Name,
-            "salePrice" :  item.BaseSellingPrice,
+            "salePrice" :  item.BaseSellingPrice || 1, //hardcoded
+            "purchasePrice" :  item.LastPurchasePrice || 1, //hardcoded
             "isSold" :  item.IsSold,
             "isPurchased" :  item.IsBought,
-            "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : '',
+            "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : '1', //hardcoded
+            "expenseAccRefId" :  item.ExpenseAccount !== null ? item.ExpenseAccount.UID : '1', //hardcoded
         }
 
         return parseData;

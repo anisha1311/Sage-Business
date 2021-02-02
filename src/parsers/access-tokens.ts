@@ -10,12 +10,11 @@ export class AccessTokenParser {
     public static parseAccessTokens(accessToken: any) {
         try {
             let parseData = {
-                'accessToken': accessToken.access_token,
-                'refreshToken': accessToken.refresh_token,
-                'expiresAt': getDateByAddingSeconds(accessToken.x_refresh_token_expires_in),
-                'accessTokenExpireTime':getDateByAddingSeconds(accessToken.expires_in),
-                'userId': "",
-                'provider': 1
+                "accessToken": "asdf",
+                "refreshToken": "asdf",
+                "refreshTokenExpiresAt": "2012/12/12",
+                "accessTokenExpireTime": "11234",
+                "provider": "1234"
             }
             return parseData;
         } catch (error) {

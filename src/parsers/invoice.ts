@@ -40,21 +40,42 @@ export class InvoiceParser {
      * @param businessId 
      */
     parse(invoice: any, businessId: string) {
+        let invoiceDate : any;
+        let promiseDate : any;
+        var lines: any = [];
+        if(invoice.Date!==null){
+            invoiceDate = invoice.Date.split('-');
+        }
+        if(invoice.PromisedDate !==null){
+            promiseDate = invoice.PromisedDate.split('-');
+        }
+        for (var i = 0; i<invoice.Lines.length; i++)
+        {
+            var line: any = {};
+            line['description'] =  invoice.Lines[i].Description          
+            line['itemId'] = invoice.Lines[i].Item.UID;               
+            line['lineNumber'] = invoice.Lines[i].Item.Number;  
+            line['lineAmount'] = invoice.Lines[i].CostOfGoodsSold;     
+            line['quantity'] = invoice.Lines[i].ShipQuantity;  
+            line['accountCode'] = '1';
+            lines.push(line);
+        }
+
         let parseData = {
             "number" : invoice.Number,
-            "date" : invoice.Date,
-            "dueDate" :  invoice.PromisedDate,
-            "shipDate" :  '',
-            "trackingNo" :  '',
+            "date" : '01-09-2021',//invoiceDate[1]+'-' + invoiceDate[2].substring(0,2) + '-' + invoiceDate[0], 
+            "dueDate" : '01-09-2021',// promiseDate,
+            "shipDate" :  '01-09-2021', //hardcoded
+            "trackingNo" :  '23456789', //hardcoded
             "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
-            "totalLineItem" :  '',
-            "lineAmountType" :  '',
+            "totalLineItem" :  '2', //hardcoded
+            "lineAmountType" :  '2', //hardcoded
             "amount" :  invoice.TotalAmount,
             "balance" :  invoice.BalanceDueAmount,
             "totalTax" : invoice.TotalTax,
             "platformId" :  invoice.UID,
             "type" :  '1', ///NEED TO CHECK once again
-            "lines" :  '',
+            "lines" :  lines,
         }
 
         return parseData;

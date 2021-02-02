@@ -5,13 +5,13 @@ export enum EntityType {
     contact = "CONTACT",
     account = "ACCOUNT",
     item = "ITEM", //added by anisha
-    invoice = "INVOICE", //added by anisha
+    invoice_bill = "INVOICES_BILLS", //added by anisha
     jv = "JOURNAL",
     trialBalance = "BUSINESS_TRIAL_BALANCES",
     arAging = "AR_RECEIVABLE",
     apAging = "AP_PAYABLE",
     transactions = "BUSINESS_TRANSACTION",
-    payments = "BUSINESS_PAYMENTS",
+    payments = "PAYMENTS",
     webhookJvTransactionCombine = "WEBHOOK_JV_TRANSACTION_COMBINE",
     webhookAccount = "WEBHOOK_ACCOUNT",
     qbError= 'QUEUE_ERROR',

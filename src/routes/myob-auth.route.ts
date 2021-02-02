@@ -54,14 +54,26 @@ const router = Router();
  */
         router.get('/', async (req: Request, res: Response) => {
         // router.get('/connection-url', async (req: Request, res: Response) => {
+            
                 try {
+                    let timezone = TimeZone.default;
                     // To get connection url from myob
-                    const authUri = await quickbookConnectionService.getConnectURL();
-                    res.redirect(authUri);
-                    let response = {
-                        url: authUri,
-                    };
-                    return res.status(OK).json({ status: true, data: response, message: Constant.qbResMsg.connectionUrl });
+
+                    if( smaiBusinessService.access_token && smaiBusinessService.refresh_token)
+                    {
+                        console.log('Have AccessToken and Refresh Token ');
+                        let response = await smaiBusinessService.saveBusiness('false', smaiBusinessService.access_token , smaiBusinessService.refresh_token, timezone);
+                    }
+                    else
+                    {
+                        console.log('herekrjk');
+                        
+                        const authUri = await quickbookConnectionService.getConnectURL();
+                        res.redirect(authUri);
+                    }
+
+                
+                  //  return res.status(OK).json({ status: true, data: response, message: Constant.qbResMsg.connectionUrl });
                 } catch (error) {
                 return res.status(INTERNAL_SERVER_ERROR).json({ status: false, error: error, message: Constant.commanResMsg.somethingWentWrong });
             }
@@ -140,19 +152,23 @@ router.get('/login/callback', async (req: Request, res: Response) => {
         if (validationResponse.error) {
             return res.status(BAD_REQUEST).json({ status: false, message: Constant.commanResMsg.modelInvalid, error: validationResponse.error.message });
         }
+        let timezone = TimeZone.default;
         // Prepare the callback string url
         const code:any = req.query.code;
         let buff = Buffer.from(code);
         const buffString:any = buff.toString('ascii');
         const callbackString:any = buffString.replace(/\s+/g,'');
         console.log('Access_Code--', callbackString);
-
+        //let response:any = '';
+        if(callbackString) {
+          let response = await smaiBusinessService.saveBusiness(callbackString,'false','false', timezone);
+        }
        //** const callbackString = stringFormat(Constant.urlConstant.QbUrl.callback, [req.query.state.toString(), req.query.code.toString()]);
        //** let timezone = TimeZone.default;
         // This function is for testing purpose so static id is passed as an argument intentionally. User id static for testing purpose
        //** let response = await smaiBusinessService.saveBusiness(callbackString, req.query.realmId.toString(), '5ec3c065576369c522453c0c', timezone);
-        let response = await smaiBusinessService.saveBusiness(callbackString);
-        res.status(OK).json(response);
+        //let response = await smaiBusinessService.saveBusiness(callbackString);
+       // res.status(OK).json(response);
 
     } catch (error) {
         try {

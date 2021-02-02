@@ -14,14 +14,14 @@ export class ChartOfAccountParser {
      */
      public parseChartofAccounts(accounts: any, businessId: string) {
         try {
-            let length = accounts.length || 0;
+            let length = accounts.Items.length || 0;
             if (accounts && length > 0) {
                 let parsedAccounts: any = [];
                 for (let i = 0; i < length; i++) {
-                    const account = accounts[i];
+                    const account = accounts.Items[i];
                     parsedAccounts.push(this.parse(account, businessId))
                 }
-
+                
                 return parsedAccounts;
             }
             else {
@@ -43,14 +43,14 @@ export class ChartOfAccountParser {
             'businessId': businessId,
             'platformAccountId': account.UID,
             'name': account.Name,
-            'accountSubType': account.Type,
-            'parentAccountName': account.ParentAccount!== null? this.getAccountType(account.ParentAccount.Name): '',
-            'classification': account.Classification,
-            'active': account.IsActive,
-            'accountNumber': account.BankingDetails !== null? account.BankingDetails.BankAccountNumber:'',
-            'parentAccountId': account.ParentAccount!== null? this.getParentOrCategoryAccountId(account.AccountType): ''
-        }
-
+            'accountSubType':  1, //  account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): ''
+            'classification':  'Liability', //account.Classification ||
+            'active': account.IsActive,           
+            'parentAccountId': account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): 1 ,
+            'parentAccountName':  'Bank', // account.ParentAccount!== null?  account.ParentAccount.Name ://hardcoded
+             //'accountNumber': account.BankingDetails !== null? account.BankingDetails.BankAccountNumber: 12324324,
+        }        
+    
         return parseData;
     }
 
@@ -66,6 +66,27 @@ export class ChartOfAccountParser {
         else {
             return this.getParentOrCategoryAccountId(accountType);
         }
+    }
+
+    getParentId(parentAccountName:string){
+        let idMap:any = {
+            'Bank':1,
+            'Account Receivable':2,
+            'Other Current Asset' :3,
+            'Other Asset' :4,
+            'Fixed Asset':5,
+            'Credit Card':6,
+            'Accounts Payable':7,
+            'Other Current Liability':8,
+            'Long Term Liability':9,
+            'Equity':10,
+            'Cost Of Goods Sold':11,
+            'Expense':12,
+            'Other Expense':13,
+            'Income':14,
+            'Other Income':15
+        }
+        return idMap[parentAccountName] || 1;
     }
 
     /**

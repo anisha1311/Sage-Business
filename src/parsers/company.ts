@@ -3,6 +3,7 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 
 export class CompanyParser {
+
     /**
     * 
     * @param companyInfo 
@@ -11,10 +12,18 @@ export class CompanyParser {
     public static parseCompany(companyInfo: any) {
         try {
             let parseData = {
-                "Id": companyInfo.CompanyName,
-                "Name": companyInfo.LegalName,
-                "country": companyInfo.Country,
-                "Uri": companyInfo.Email.Address
+                "businessName": " " , //companyInfo.Name !== null ? companyInfo.Name  : 
+                "legalName": " ",
+                "country":  " " , // companyInfo.Country !== null ? companyInfo.Country  : 
+                "email": " ",
+                "fiscalYearStartMonth": " ",
+                "businessStartDate": "2012/12/12",
+                "businessPlateformId": " ",
+                "homeCurrency": "IND",
+                "provider": 3,
+                "leadId": " ",
+                "website": "www.getpostman.com/oauth2/callback",
+                "timezone": "IST"
             }
             return parseData;
 
@@ -31,12 +40,13 @@ export class CompanyParser {
     public static parseCompanyAddress(companyInfo: any) {
         try {
             let companyAdd: any = null;
-            if (companyInfo.CompanyAddr) {
+            if (companyInfo){
                 companyAdd = {
-                    city: companyInfo.CompanyAddr.City ? companyInfo.CompanyAddr.City : '',
-                    line1: companyInfo.CompanyAddr.Line1 ? companyInfo.CompanyAddr.Line1 : '',
-                    postalCode: companyInfo.CompanyAddr.PostalCode ? companyInfo.CompanyAddr.PostalCode : '',
-                    country: companyInfo.CompanyAddr.Country ? companyInfo.CompanyAddr.Country : ''
+                    addressType: 3,
+                    city: " ",
+                    line1: " ",
+                    postalCode: " ",
+                    country: " "
                 }
             }
             return companyAdd;

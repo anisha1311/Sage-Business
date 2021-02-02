@@ -23,7 +23,7 @@ let apisvc = new CommanAPIService();
 const headervalues :any = { 
 	'Content-Type': 'application/x-www-form-urlencoded'
   };
-export class QuickbooksConnectionService {
+export class MyobConnectionService {
 	/**
 	 * Will generate Url for Same
 	 */
@@ -37,11 +37,6 @@ export class QuickbooksConnectionService {
 	 * @param callbackString 
 	 */
 	async getTokens(callbackString: string): Promise<any> {
-		console.log('myob-connection-service-gettokens');
-		console.log('consumerKey', consumerKey);
-		console.log('grant_type', grant_type);
-        console.log('redirect_uri', redirect_uri);
-		console.log('scope', scope);
 		var data = qs.stringify({
 			'client_id': consumerKey,
 			'client_secret': client_secret,
@@ -55,11 +50,49 @@ export class QuickbooksConnectionService {
 		  )
 			.then( 
 				(response) => { 
-				  	  console.log(response);
 					  var result = response.data; 
-					  console.log("access token - "+result.access_token);
+					  console.log('result', result)
+					 
+					  resolve(result); 
+							  }, 
+					  (error) => { 
+						  console.log('error', error);
+						var data = {
+						  access_token : '',
+						  refresh_token : '',
+						  success: false
+						}
+						resolve(data); 
+					  //reject(error); 
+					} 
+				)                    
+			});
+	}
+
+	/**
+	 * Will return new Tokens using refresh Tokens
+	 * @param refreshToken // string
+	 */
+	async refreshTokensByRefreshToken(refreshToken: string): Promise<any> {
+		console.log('refreshTokensByRefreshToken');
+		
+		var data = qs.stringify({
+			'client_id': consumerKey,
+			'client_secret': client_secret,
+			'grant_type': 'refresh_token',
+			'refresh_token': refreshToken
+		  });
+		  console.log('data', data);
+		return new Promise(function (resolve, reject) {
+			axios.post('https://secure.myob.com/oauth2/v1/authorize/',data, headervalues			
+		  )
+			.then( 
+				(response) => { 
+					  var result = response.data; 
+					  console.log('result', result)
 					  var data = {
 						access_token : result.access_token,
+						refresh_token : result.refresh_token,
 						success: true
 					  }
 					  resolve(data); 
@@ -68,6 +101,7 @@ export class QuickbooksConnectionService {
 						  console.log('error', error);
 						var data = {
 						  access_token : '',
+						  refresh_token : '',
 						  success: false
 						}
 						resolve(data); 
@@ -75,17 +109,6 @@ export class QuickbooksConnectionService {
 					} 
 				)                    
 			});
-		//let tokens = await oauthClient.createToken(callbackString);
-	//	console.log('tokens', tokens);
-	//	return tokens.json;
-	}
-
-	/**
-	 * Will return new Tokens using refresh Tokens
-	 * @param refreshToken // string
-	 */
-	async refreshTokensByRefreshToken(refreshToken: string): Promise<any> {
-		return oauthClient.refreshUsingToken(refreshToken);
 	}
 	/**
 	 * Will disconnect the business from qb

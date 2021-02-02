@@ -17,9 +17,8 @@ export class EmployeeParser {
             let length = employeeInfo.Items.length || 0;
             console.log('length', length);
             if (employeeInfo && length > 0) {
-                let parsedEmployees: any = [];
                 for (let i = 0; i < length; i++) {
-                    const employee = employeeInfo.Items[i];
+                    const employee = employeeInfo.Items[i];               
                     parsedEmployees.push(this.parse(employee, businessId))
                 }                
                 return parsedEmployees;
@@ -40,6 +39,31 @@ export class EmployeeParser {
      * @param businessId 
      */
     parse(employee: any, businessId: string) {
+
+        var employeeAddresses : any = [];
+        var employeePhones: any = [];
+        for (var i = 0; i<employee.Addresses.length; i++) {
+            const employeeAddress : any = {};
+            const employeePhone : any = {};
+            employeeAddress['businessId'] = businessId
+            employeeAddress['addressType'] =  1,
+            employeeAddress['addressLine1'] = employee.Addresses[i].Street !== null && employee.Addresses[i].Street !== ''? employee.Addresses[i].Street : 'Street', //hard coded
+            employeeAddress['addressLine2'] = " " || 'Line2', //hard coded
+            employeeAddress['status'] = 1,
+            employeeAddress['city'] = employee.Addresses[i].City || 'City',
+            employeeAddress['postalCode']    = employee.Addresses[i].Postcode || 'Postcode',
+            employeeAddress['state'] =  employee.Addresses[i].State || 'State',
+            employeeAddress['country'] =  employee.Addresses[i].Country || 'Country',
+            employeeAddresses.push(employeeAddress);
+
+            employeePhone['businessId'] = businessId,
+            employeePhone['phoneType']    = 1, //hard code
+            employeePhone['phoneNumber'] = '6375372026', //hard code employee.Addresses[i].Phone1 != null ? employee.Addresses[i].Phone1 : 
+            employeePhone['status'] = 1,        
+            employeePhones.push(employeePhone);
+        }
+
+
         let parseData = {
 
             "businessId" : businessId,
@@ -49,15 +73,44 @@ export class EmployeeParser {
             "isEmployee" : 'true',
             "active" : employee.IsActive,
             "platformContactId" : employee.UID,
-            "contactAddress" : [],
-            "contactPhone" : [],
+            "contactAddress" : employeeAddresses,
+            "contactPhone" : employeePhones
         }
 
         return parseData;
     }
 
+
+
   
 }
 
+/*
 
+    async parseAddress(address: any, businessId: string) {
+        let parseData = {
+            "addressType" : null,
+            "addressLine1" : address.Street,
+            "addressLine2" : null,
+            "status" : null,
+            "city" :  address.City,
+            "postalCode" :  address.PostCode,
+            "state" :  address.State,
+            "country" :  address.Country,
+            "businessId" : businessId,
+        }
+        return parseData;
+    }
+
+    async parsePhones(address: any, businessId: string) {
+        let parseData = {
+            "phoneType" : null,
+            "phoneNumber" : address.Phone1,
+            "phoneCountryCode" : null,
+            "status" : null,
+            "businessId" : businessId,
+        }
+        return parseData;
+    }
+*/
 
