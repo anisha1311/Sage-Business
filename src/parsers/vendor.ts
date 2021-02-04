@@ -65,7 +65,7 @@ export class VendorParser {
 
         let parseData = {
             "businessId" : businessId,
-            "contactName" : vendor.CompanyName,    
+            "contactName" : vendor.IsIndividual !== false ? vendor.FirstName + ' ' + vendor.LastName : vendor.CompanyName,    
             "isSupplier" : 'true',
             "isCustomer" : 'false',
             "isEmployee" : 'false',

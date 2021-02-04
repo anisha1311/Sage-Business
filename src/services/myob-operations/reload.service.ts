@@ -20,14 +20,16 @@ export class MonthlReloadService {
      * @param businessId 
      * @param realmId 
      */
-    async reloadCompany(date: string, businessId: string, realmId: string, isMonthlyReload: boolean) {
+    async reloadCompany(date: string, todayDate: string, businessId: string, companyId: string,refresh_token:string, isMonthlyReload: boolean) {
         try {
 
             // Convert date into required format
-            let syncDate = moment(date, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]').subtract(2, 'minutes').format('YYYY-MM-DD[T]HH:mm:ss-00:00');
+            let lastSyncDate = moment(date, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]').subtract(2, 'minutes').format('YYYY-MM-DD[T]HH:mm:ss-00:00');
+           
+ 
             // Get access token
-            let tokenResponse = await apisvc.getAccessToken(realmId)
-            if (tokenResponse.data && tokenResponse.status === true) {
+             let tokenResponse = await apisvc.getAccessToken(refresh_token);
+          /*  if (tokenResponse.data && tokenResponse.status === true) {
                 console.log('Token data recieved')
                 if (isMonthlyReload) {
                     let res = await this.verifyToken(tokenResponse.data.accessToken, realmId, syncDate)
@@ -52,7 +54,7 @@ export class MonthlReloadService {
                 return { data: null, message: Constant.busResMsg.businessReload, status: true }
             } else {
                 return { data: null, message: Constant.busResMsg.failedReload, status: false }
-            }
+            }*/
 
         } catch (error) {
             logger.error("Reload service Failure: " + error)
@@ -62,12 +64,12 @@ export class MonthlReloadService {
     }
 
 
-    async reloadData(syncDate: string, tokenResponse: any, realmId: string, businessId: string, reloadType?: ReloadType, monthlyReloadDate?: string) {
+    async reloadData(access_token:string, syncDate: string, todayDate: string, businessId: string, companyId: string) {
 
         // Fetch all entites & thier reports required for reloading a company
-        await this.fetchCoa(syncDate, tokenResponse, realmId, businessId)
+      //  await this.fetchCustomers(access_token, syncDate, todayDate, businessId, companyId);
         //Update date on bsuiness service once reload done
-        this.updateSyncDate(businessId)
+     //   this.updateSyncDate(businessId)
     }
 
     /**
@@ -77,18 +79,21 @@ export class MonthlReloadService {
      * @param realmId 
      * @param businessId 
      */
-    async fetchCoa(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchCustomers(lastSyncDate: string, todayDate: string, businessId: string, companyId: string, isMonthlyReload: boolean) {
 
         try {
-            let accessToken = tokenResponse.data.accessToken
             // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.QbUrl.cdcCoa, [realmId, date])
-            let response = await apisvc.getQBResource(url, accessToken)
-            if (response.json) {
+            let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [companyId, lastSyncDate, todayDate]);
+            console.log('url>>>>', url);
+            
+            // let response = await apisvc.getQBResource(url, access_token);
+            // console.log('response--', response);
+            
+          /*  if (response) {
                 // Check for expected response
-                const isExist = _.has(response.json, 'CDCResponse[0].QueryResponse')
+                const isExist = _.has(response, 'CDCResponse[0].QueryResponse')
                 if (isExist) {
-                    let arr = response.json.CDCResponse[0].QueryResponse
+                    let arr = response.CDCResponse[0].QueryResponse
                     // Filter COA
                     let arrCOA = _.filter(arr, ReloadServiceKeys.account);
                     if (arrCOA.length > 0) {
@@ -99,7 +104,7 @@ export class MonthlReloadService {
 
                     }
                 }
-            }
+            }*/
         } catch (error) {
             logger.error(error)
         }
@@ -148,7 +153,7 @@ export class MonthlReloadService {
             let url = stringFormat(Constant.urlConstant.QbUrl.companyInfo, [realmId, date])
             let response = await apisvc.getQBResource(url, accessToken)
             // Check for expected response
-            if (response.json) {
+            if (response) {
                 return true
             }
             return false

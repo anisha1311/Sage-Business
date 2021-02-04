@@ -52,9 +52,9 @@ export class BillParser {
 
         for (var i = 0; i<bill.Lines.length; i++) {
             var line: any = {};
-            line['description'] =  bill.Lines[i].Description          
-            line['itemId'] = bill.Lines[i].Item.UID;               
-            line['lineNumber'] = bill.Lines[i].Item.Number;  
+            line['description'] =  'description', // bill.Lines[i].Description          
+            line['itemId'] = bill.Lines[i].Item !== null ? bill.Lines[i].Item.UID : '4567890';               
+            line['lineNumber'] = '23'//bill.Lines[i].Item ? bill.Lines[i].Item.Number : 23;  
             line['lineAmount'] = bill.Lines[i].CostOfGoodsSold;     
             line['quantity'] = bill.Lines[i].ShipQuantity;  
             line['accountCode'] = '1';
@@ -68,7 +68,7 @@ export class BillParser {
             "dueDate" :  '01-09-2021',// promiseDate,
             "shipDate" :  '01-09-2021', //hardcoded
             "trackingNo" :   '23456789', //hardcoded
-            "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
+          //  "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
             "totalLineItem" :  '2', //hardcoded
             "lineAmountType" :  '2', //hardcoded
             "amount" :  bill.TotalAmount,

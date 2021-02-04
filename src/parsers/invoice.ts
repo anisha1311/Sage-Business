@@ -52,9 +52,9 @@ export class InvoiceParser {
         for (var i = 0; i<invoice.Lines.length; i++)
         {
             var line: any = {};
-            line['description'] =  invoice.Lines[i].Description          
-            line['itemId'] = invoice.Lines[i].Item.UID;               
-            line['lineNumber'] = invoice.Lines[i].Item.Number;  
+            line['description'] =  'description', //invoice.Lines[i].Description         
+            line['itemId'] = invoice.Lines[i].Item !== null ? invoice.Lines[i].Item.UID : '23676236726';               
+            line['lineNumber'] = '23' //invoice.Lines[i].Item !== null ? invoice.Lines[i].Item.Number : '23';  
             line['lineAmount'] = invoice.Lines[i].CostOfGoodsSold;     
             line['quantity'] = invoice.Lines[i].ShipQuantity;  
             line['accountCode'] = '1';
@@ -67,13 +67,13 @@ export class InvoiceParser {
             "dueDate" : '01-09-2021',// promiseDate,
             "shipDate" :  '01-09-2021', //hardcoded
             "trackingNo" :  '23456789', //hardcoded
-            "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
+           // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
             "totalLineItem" :  '2', //hardcoded
             "lineAmountType" :  '2', //hardcoded
             "amount" :  invoice.TotalAmount,
             "balance" :  invoice.BalanceDueAmount,
             "totalTax" : invoice.TotalTax,
-            "platformId" :  invoice.UID,
+            "platformId" :  invoice.UID || '2343564',
             "type" :  '1', ///NEED TO CHECK once again
             "lines" :  lines,
         }

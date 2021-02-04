@@ -67,7 +67,7 @@ export class EmployeeParser {
         let parseData = {
 
             "businessId" : businessId,
-            "contactName" : employee.FirstName + ' ' + employee.LastName,    
+            "contactName" :  employee.IsIndividual !== false ? employee.FirstName + ' ' + employee.LastName : employee.CompanyName,       
             "isSupplier" : 'false',
             "isCustomer" : 'false',
             "isEmployee" : 'true',

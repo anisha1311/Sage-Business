@@ -12,6 +12,16 @@ const oauthClient = new OAuthClient({
     redirectUri: process.env.QUICKBOOK_CALLBACK_URL,
 })
 const httpService = new HTTPService()
+import axios from 'axios';
+import qs from 'qs';
+
+const API_URL :any =  process.env.MYOB_API_URL;
+const clientId = process.env.MYOB_CLIENT_ID;
+const grant_type = process.env.MYOB_GRANT_TYPE_R;
+const redirect_uri = process.env.MYOB_CALLBACK_URL;
+const scope = process.env.MYOB_SCOPE;
+const client_secret = process.env.MYOB_CLIENT_SECRETE;
+
 
 export class CommanAPIService {
 
@@ -19,27 +29,41 @@ export class CommanAPIService {
      * To get Access token from smai-business-service
      * @param realmId
      */
-    async getAccessToken(realmId: string) {
+    async getAccessToken(refresh_token:string) {
 
         let businessId = ""
         try {
 
-            let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId])
-            let response = await httpService.get(accessTokenUrl)
-            if (response.data && response.data.data && response.data.status === true) {
+            var data = qs.stringify({
+                'client_id': clientId,
+                'client_secret': client_secret,
+                'grant_type': 'refresh_token',
+                'refresh_token': refresh_token
+              });
 
-                let responsedata = response.data
-                businessId = responsedata.data.businessId
-                let expiretime = responsedata.data.accessTokenExpireTime
+            const headervalues :any = { 
+             'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            
+            let refreshTokenUrl: string =Constant.urlConstant.myobUrl.refreshTokenUrl;
+            let response = await httpService.post(refreshTokenUrl, data, headervalues);
+            
+            if (response && response.status === 200) {
+                console.log('response', response);
+                //let responsedata = response.data
+                //businessId = responsedata.data.businessId
+                let expiretime = response.data.expires_in;
                 let currenttime = new Date().toISOString()
                 // by how mucn minutes expire date ahead of current date
                 let minutes = moment(expiretime).diff(moment(currenttime, DateFormat.dateTimeIso), TimeUnitKeys.minutes);
                 // if four minutes or less remaining for token to be expired then fetch the new token
                 console.log(minutes+ ' minutes left for access token expiry ' + " businessId: "+businessId)
-                if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
+               if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
                     // request for a new token from qb
-                    let tokenResponse = await this.refreshTokensByRefreshToken(responsedata.data.refreshToken)
-                    if (tokenResponse.token && tokenResponse.token.access_token) {
+                    console.log('hellloooooo');
+                    
+                   // let tokenResponse = await this.refreshTokensByRefreshToken(response.data.refresh_token)
+                  /*  if (tokenResponse.token && tokenResponse.token.access_token) {
                         let newtime = new Date().toISOString()
                         let qbaccessTokenExpiryMinutes = (tokenResponse.token.expires_in / 60)
                         let qbrefreshTokenExpiryDays = (tokenResponse.token.x_refresh_token_expires_in / (60 * 60 * 24))
@@ -54,7 +78,7 @@ export class CommanAPIService {
                         responsedata.data.expiresAt = newRefreshTokenExpireTime
                         // update access token on smai-business-service.
                         this.updateTokenInsmaiBusinessService(responsedata.data)
-                    }
+                    }*/
                 }
             }
             return response.data
@@ -74,13 +98,19 @@ export class CommanAPIService {
      * @param accessToken
      */
     async getQBResource(urlString: string, accessToken: string) {
+        console.log('urlString', urlString);
+        console.log('accessToken', accessToken);
+        
         if (process.env.QUICKBOOK_API_URL) {
-            await oauthClient.setToken({ access_token: accessToken });
-            return oauthClient.makeApiCall({
+            //await oauthClient.setToken({ access_token: accessToken });
+            return axios({
                 url: urlString,
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'x-myobapi-key': clientId,
+                    'x-myobapi-version': 'v2',
+                    'Accept-Encoding': 'gzip,deflate',
+                    'Authorization': 'Bearer '+accessToken
                 }
             })
         }

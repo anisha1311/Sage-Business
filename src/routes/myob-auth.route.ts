@@ -1,7 +1,7 @@
 import '../loadenv';
 import { Request, Response, Router } from 'express';
 import { OK, INTERNAL_SERVER_ERROR, BAD_REQUEST } from 'http-status-codes';
-import { QuickbooksConnectionService } from 'src/services/myob-operations/myob-connection.service';
+import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { SmaiBusinessService } from 'src/services/myob-operations/smai.service';
 import logger from '@shared/logger';
 import { TimeZone } from '@shared/enums/comman-enum';
@@ -9,7 +9,7 @@ import { ConnectBusinessSchema } from 'src/requests/business-connect.request';
 import { Constant } from '@shared/constants';
 import { stringFormat } from '@shared/functions';
 import { RefteshTokenSchema } from 'src/requests/refresh-token.request';
-const quickbookConnectionService = new QuickbooksConnectionService();
+const myobConnectionService = new MyobConnectionService();
 const smaiBusinessService = new SmaiBusinessService();
 const router = Router();
 
@@ -65,10 +65,8 @@ const router = Router();
                         let response = await smaiBusinessService.saveBusiness('false', smaiBusinessService.access_token , smaiBusinessService.refresh_token, timezone);
                     }
                     else
-                    {
-                        console.log('herekrjk');
-                        
-                        const authUri = await quickbookConnectionService.getConnectURL();
+                    {                        
+                        const authUri = await myobConnectionService.getConnectURL();
                         res.redirect(authUri);
                     }
 
@@ -317,7 +315,7 @@ router.get('/refresh-token/:refreshToken', async (req: Request, res: Response) =
         if (validationResponse.error) {
             return res.status(BAD_REQUEST).json({ status: false, message: Constant.commanResMsg.modelInvalid, error: validationResponse.error.message });
         }
-        const quickbookService = new QuickbooksConnectionService();
+        const quickbookService = new MyobConnectionService();
         // To get access token from refresh token
         const accessToken = await quickbookService.refreshTokensByRefreshToken(req.params.refreshToken);
         return res.status(OK).json({ status: true, data: accessToken.token, message: Constant.busResMsg.createRefreshToken });

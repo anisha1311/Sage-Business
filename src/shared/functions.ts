@@ -125,6 +125,28 @@ export const getDate = function (datestr: string) {
     }
 
 }
+//added by anisha
+export const get3YearAgoDate = function (datestr: string) {
+    try {
+        let date = new Date(datestr);
+        let year = date.getFullYear()-3;
+        let month = date.getMonth() + 1;
+        let dt = date.getDate();
+        let dtstr = ''
+        let monthstr = ''
+        if (dt < 10) {
+            dtstr = '0' + dt;
+        }
+        if (month < 10) {
+            monthstr = '0' + month;
+        }
+        let formattedDate = year + '-' + monthstr + '-' + dtstr
+        return formattedDate;
+    } catch (error) {
+        throw error
+    }
+
+}
 
 export function writeWebHookLogs(item: WebhookModel) {
     fse.outputFile('webhook-logs/' + new Date().toDateString() + '/' + item.platformBusinessId + '/' + item.platformBusinessId + '-' + new Date().getTime() + '.txt', JSON.stringify(item), (err: Error) => {

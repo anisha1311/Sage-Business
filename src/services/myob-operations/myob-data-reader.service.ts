@@ -10,11 +10,10 @@ export class MyobDataReaderService {
      *  will return list of preferences
      * @param token
      */
-    async getCompanyInfo(token: string): Promise<any> {
+    async getCompanyInfo(token: string): Promise<any> {        
         console.log('**********getCompanyInfo***********')
         try {
             let url = Constant.urlConstant.myobUrl.accountRight;
-            console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
@@ -29,10 +28,10 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllCustomers(token: string, Uri: string): Promise<any> {
+    async getAllCustomers(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllCustomers***********')
         try {
-            let url = Uri+'/Contact/Customer';
+            let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -40,17 +39,17 @@ export class MyobDataReaderService {
                return response.data;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+             //   throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             throw error
         }
     }
 
-    async getAllSuppliers(token: string, Uri: string): Promise<any> {
+    async getAllSuppliers(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllSuppliers***********')
         try {
-            let url = Uri+'/Contact/Supplier';
+            let url = stringFormat(Constant.urlConstant.myobUrl.vendorUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -65,10 +64,10 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllContacts(token: string, Uri: string): Promise<any> {
-        console.log('**********getAllContacts***********')
+    async getAllPersonals(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+        console.log('**********getAllPersonals***********')
         try {
-            let url = Uri+'/Contact';
+            let url = stringFormat(Constant.urlConstant.myobUrl.personalUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);            
@@ -84,10 +83,10 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllEmployees(token: string, Uri: string): Promise<any> {
+    async getAllEmployees(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllEmployees***********')
         try {
-            let url = Uri+'/Contact/Employee';
+            let url = stringFormat(Constant.urlConstant.myobUrl.employeeUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -104,10 +103,10 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllAccounts(token: string, Uri: string): Promise<any> {
+    async getAllAccounts(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllAccounts***********')
         try {
-            let url = Uri+'/GeneralLedger/Account';
+            let url = stringFormat(Constant.urlConstant.myobUrl.accountUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -124,10 +123,10 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllItems(token: string, Uri: string): Promise<any> {
+    async getAllItems(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllItems***********')
         try {
-            let url = Uri+'/Inventory/Item';
+            let url = stringFormat(Constant.urlConstant.myobUrl.itemUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -144,14 +143,13 @@ export class MyobDataReaderService {
         }
     }
     
-    async getAllInvoices(token: string, Uri: string): Promise<any> {
+    async getAllInvoices(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllInvoices***********')
         try {
-            let url = Uri+'/Sale/Invoice/Item';
+            let url = stringFormat(Constant.urlConstant.myobUrl.invoiceUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            console.log('response->>',response.data);
             
             if (response) {
                return response.data;
@@ -165,14 +163,16 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllBills(token: string, Uri: string): Promise<any> {
+    async getAllBills(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+        console.log('STEP 2 getAllBills');
+        
         console.log('**********getAllBills***********')
         try {
-            let url = Uri+'/Purchase/Bill/Item';
-            console.log('url--', url);
+            let url = stringFormat(Constant.urlConstant.myobUrl.billUrl, [companyId, startDate, endDate]);
+            console.log('STEP 2 url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            console.log('response->>',response.data);
+            console.log('STEP 2 response->>',response.data);
             
             if (response) {
                return response.data;
@@ -187,10 +187,10 @@ export class MyobDataReaderService {
     }
 
     
-    async getAllCustomerPayments(token: string, Uri: string): Promise<any> {
+    async getAllCustomerPayments(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllCustomerPayments***********')
         try {
-            let url = Uri+'/Sale/CustomerPayment';
+            let url =  stringFormat(Constant.urlConstant.myobUrl.customerPaymentUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
@@ -208,10 +208,10 @@ export class MyobDataReaderService {
     }
 
       
-    async getAllSupplierPayments(token: string, Uri: string): Promise<any> {
+    async getAllSupplierPayments(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
         console.log('**********getAllSupplierPayments***********')
         try {
-            let url = Uri+'/Purchase/SupplierPayment';
+            let url = stringFormat(Constant.urlConstant.myobUrl.vendorPaymentUrl, [companyId, startDate, endDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);

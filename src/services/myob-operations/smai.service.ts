@@ -1,5 +1,6 @@
 import { HTTPService } from '@shared/http-service';
 import { CustomerParser } from 'src/parsers/customer';
+import { PersonalParser } from 'src/parsers/personal';
 import { CompanyParser } from 'src/parsers/company';
 import { VendorParser } from 'src/parsers/vendor';
 import { ContactParser } from 'src/parsers/contact';
@@ -28,6 +29,7 @@ import { CommanAPIService } from '@shared/api-service';
 import { MonthlReloadService } from './reload.service';
 import { ReloadServiceKeys } from '@shared/enums/reload-enum';
 import { start } from 'repl';
+import { constant } from 'lodash';
 
 const httpService = new HTTPService()
 const myobDataReaderService = new MyobDataReaderService();
@@ -39,11 +41,10 @@ const reloadsbc = new MonthlReloadService()
 export class SmaiBusinessService {
     public  access_token:string='';
     public  refresh_token:string='';
-
+    public syncDate:any = 'null';
     /**
      * will post add Business Info to smai-Business-service
      * @param callbackString 
-     * @param realmId 
      * @param userid 
      * @param timezone 
      */
@@ -52,7 +53,7 @@ export class SmaiBusinessService {
             let accessTokens:any = {};
             if(callbackString!=='false')
             {                
-                // Get access token from sage business cloud
+                // Get access token from myob 
                 accessTokens = await myobConnectionService.getTokens(callbackString);
                 if (accessTokens.access_token) {
                     console.log('Get the AccessToken Done !!!');
@@ -70,30 +71,80 @@ export class SmaiBusinessService {
                     this.access_token = accessTokens.access_token;
                     this.refresh_token=accessTokens.refresh_token;
                 }
-
-
             }
-           
             // Fetch companies to get the businessId
             let companyInfo = await myobDataReaderService.getCompanyInfo(this.access_token);
-            for(var index=0; index<companyInfo.length;index++){
-                console.log('length', companyInfo.length);
-            
-                 let parsedCompany = CompanyParser.parseCompany(companyInfo);
-                 let companyAddress = CompanyParser.parseCompanyAddress(companyInfo);
-                 let parsedAccessToken = AccessTokenParser.parseAccessTokens(accessTokens);
-                let requestBody = {
-                    "business": parsedCompany,
-                    "address": companyAddress,
-                    "token": parsedAccessToken
-                }
-                
-                let response = await httpService.post(Constant.urlConstant.serviceUrl.businessUrl, JSON.stringify(requestBody))
-         
-                this.saveCompanyData(this.access_token, companyInfo[index].Uri, response.data.data.id);
+            let requestBody;
+            if(companyInfo){
+                let length = companyInfo.length || 0;
+                if (companyInfo && length > 0) {
+                    for (let i = 0; i < length; i++) {
+                        const company = companyInfo[i];
+                        let parsedCompany = CompanyParser.parseCompany(company);
+                        let companyAddress = CompanyParser.parseCompanyAddress(company);
+                        let parsedAccessToken = AccessTokenParser.parseAccessTokens(accessTokens);
+                        requestBody = {
+                            "business": parsedCompany,
+                            "address": companyAddress,
+                            "token": parsedAccessToken
+                        }
+                        let response = await httpService.post(Constant.urlConstant.serviceUrl.businessUrl, JSON.stringify(requestBody));
+                        // Check for response form business service
+                        if (response.data.status == false) {
+                            try {
+                                logger.error(JSON.stringify(response.data.error))
+                            } catch (error) {
+                                console.log('response status parse error')
+                                logger.error(error)
+                            }
+                            throw new Error(Constant.busResMsg.businessConnectFailed)
+                        }
+                        if (response.data.status) {
+                            let business = response.data.data;    
+                            // Business already exist relaod the businesss
+                            if (response.data.data &&  this.syncDate != 'null') { //response.data.data.companyExist && response.data.data.companyExist === true
+                                
+                                console.log('reload company')
+                                let todayDate:any = moment(Date.now()).format('YYYY-MM-DD');
+                                    // if (userId === response.data.data.user._id) {
+                                //reloadsbc.reloadCompany(this.access_token, this.syncDate, todayDate, business.id, company.Id, false)
+                                reloadsbc.reloadCompany(this.syncDate, todayDate, business.id, company.Id, this.refresh_token, false);
+                                // }
+                                //return { status: true, data: response.data.data, message: Constant.busResMsg.updatedBusiness }
+                            } else {
+                                // New business saved
+                                console.log('New company')             
+                                
+                                let businessId = response.data.data.businessId;                            
+                                let companydata = parsedCompany as any;
+                                companydata.businessId = businessId;
+                                let date_ob = new Date();
+                                let currentDate:any = ("0" + date_ob.getDate()). slice(-2);
+                                let currentMonth:any = ("0" + (date_ob.getMonth() + 1)). slice(-2);
+                                let currentYear:any = date_ob.getFullYear(); 
+                                let todayDate = currentYear + "-" + currentMonth + "-" + currentDate;
+                    
+                                if ((currentMonth == 2) && (currentDate == 29)) {
+                                    currentDate = 28;
+                                }
+                                let last3YearDate = currentYear - 3 + "-" + currentMonth + "-" + currentDate;
+        
+                                this.saveCompanyData(this.access_token, response.data.data.id,  company.Id, last3YearDate, todayDate);        
+                               // return { status: true, data: response.data.data, message: Constant.busResMsg.addBusiness }
+                            }
+                        } else {
+                            console.log('Empty response')
+                          //  return { status: false, data: response, message: Constant.busResMsg.businessConnectFailed }
+                        }
+                        
+                    }   
+                 
+                }  
+                this.syncDate = moment(Date.now()).format('YYYY-MM-DD');          
+                } 
             }
          
-        } catch (error) {
+         catch (error) {
             console.log('error occured while onboard' + error)
             throw error
         }
@@ -104,16 +155,20 @@ export class SmaiBusinessService {
      * @param businessId 
      * @param calloutUri 
      */
-    saveCompanyData(accessToken: string, calloutUri: string, businessId: string) {        
-        // this.saveCustomers(accessToken, calloutUri, businessId);
-        // this.saveVendors(accessToken, calloutUri, businessId);
-        this.saveEmployees(accessToken, calloutUri, businessId);
-        // this.saveAccounts(accessToken, calloutUri, businessId);
-        // this.saveItems(accessToken, calloutUri, businessId); 
-        // this.saveInvoices(accessToken, calloutUri, businessId);
-        // this.saveBills(accessToken, calloutUri, businessId); 
-        // this.saveCustomerPayments(accessToken, calloutUri, businessId);  
-        // this.saveSupplierPayments(accessToken, calloutUri, businessId); 
+    saveCompanyData(accessToken: string, businessId: string, companyId: string, startDate:string, endDate:string) {     
+    
+        
+        this.saveCustomers(accessToken, businessId, companyId, startDate, endDate);
+        
+        //this.saveVendors(accessToken, businessId, companyId, startDate, endDate);
+        //this.saveEmployees(accessToken, businessId, companyId, startDate, endDate);
+        // this.savePersonals(accessToken, businessId, companyId, startDate, endDate);
+      //this.saveAccounts(accessToken, businessId, companyId, startDate, endDate);
+        //   this.saveItems(accessToken, businessId, companyId, startDate, endDate); 
+        //     this.saveInvoices(accessToken, businessId, companyId, startDate, endDate);
+        //this.saveBills(accessToken, businessId, companyId, startDate, endDate); 
+        //      this.saveCustomerPayments(accessToken, businessId, companyId, startDate, endDate);  
+        //      this.saveSupplierPayments(accessToken, businessId, companyId, startDate, endDate); 
     }
  
     /**
@@ -122,16 +177,18 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-     async saveCustomers(accessToken: string, calloutUri: string, businessId:string) {
+     async saveCustomers(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let customers = await myobDataReaderService.getAllCustomers(accessToken, calloutUri);        
-
+            let customers = await myobDataReaderService.getAllCustomers(accessToken, companyId, startDate, endDate);    
             if (customers) {
                 let parsedCustomers = new CustomerParser().parseCustomer(customers, businessId);
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedCustomers);
                 logger.info("Customers Fetched: businessId: " + businessId)
+                this.saveVendors(accessToken, businessId, companyId, startDate, endDate);
+            } else {
+                 this.saveVendors(accessToken, businessId, companyId, startDate, endDate);
             }
         } catch (error) {
             logger.error("customers Failed:-" + error);
@@ -144,17 +201,20 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId  
      */
-    async saveVendors(accessToken: string, calloutUri: string, businessId:string) {
+    async saveVendors(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let vendors = await myobDataReaderService.getAllSuppliers(accessToken, calloutUri);
+            let vendors = await myobDataReaderService.getAllSuppliers(accessToken, companyId, startDate, endDate);
 
             if (vendors) {
                 let parsedVendors = new VendorParser().parseVendor(vendors, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedVendors);
                 logger.info("Vendors Fetched: businessId: " + businessId)
+                this.saveEmployees(accessToken, businessId, companyId, startDate, endDate);
+            } else {
+                this.saveEmployees(accessToken, businessId, companyId, startDate, endDate);
             }
         } catch (error) {
             logger.error("Vendors Failed:-" + error);
@@ -167,20 +227,23 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveContacts(accessToken: string, calloutUri: string, businessId:string) {
+    async saveEmployees(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let contacts = await myobDataReaderService.getAllContacts(accessToken, calloutUri);
+            let employees = await myobDataReaderService.getAllEmployees(accessToken, companyId, startDate, endDate);
 
-            if (contacts) {
-                let parsedContacts = new ContactParser().parseContact(contacts, businessId);
+            if (employees) {
+                let parsedEmployees = new EmployeeParser().parseEmployee(employees, businessId);
                 
-                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedContacts);
-                logger.info("Contacts Fetched: businessId: " + businessId)
+                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedEmployees);
+                logger.info("Employees Fetched: businessId: " + businessId)
+                this.savePersonals(accessToken, businessId, companyId, startDate, endDate);
+            } else {
+                this.savePersonals(accessToken, businessId, companyId, startDate, endDate);
             }
         } catch (error) {
-            logger.error("Contacts Failed:-" + error);
+            logger.error("Employees Failed:-" + error);
         }
     }
 
@@ -190,22 +253,27 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveEmployees(accessToken: string, calloutUri: string, businessId:string) {
+    async savePersonals(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let employees = await myobDataReaderService.getAllEmployees(accessToken, calloutUri);
+            let personals = await myobDataReaderService.getAllPersonals(accessToken, companyId, startDate, endDate);
 
-            if (employees) {
-                let parsedEmployees = new EmployeeParser().parseEmployee(employees, businessId);
+            if (personals) {
+                let parsedPersonals = new PersonalParser().parsePersonal(personals, businessId);
                 
-                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedEmployees);
-                logger.info("Employees Fetched: businessId: " + businessId)
+                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedPersonals);
+                logger.info("Personals Fetched: businessId: " + businessId)
+                this.saveAccounts(accessToken, businessId, companyId, startDate, endDate);
+            } else {
+                this.saveAccounts(accessToken, businessId, companyId, startDate, endDate);
             }
         } catch (error) {
-            logger.error("Employees Failed:-" + error);
+            logger.error("Personals Failed:-" + error);
         }
     }
+
+    
 
       /**
      * Will parse and get contact
@@ -213,17 +281,20 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveAccounts(accessToken: string, calloutUri: string, businessId:string) {
+    async saveAccounts(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let accounts = await myobDataReaderService.getAllAccounts(accessToken, calloutUri);
+            let accounts = await myobDataReaderService.getAllAccounts(accessToken, companyId, startDate, endDate);
 
             if (accounts) {
                 let parsedAccounts = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.account, OperationType.CREATE, businessId, parsedAccounts);
                 logger.info("Accounts Fetched: businessId: " + businessId)
+                this.saveItems(accessToken, businessId, companyId, startDate, endDate); 
+            } else {
+                this.saveItems(accessToken, businessId, companyId, startDate, endDate); 
             }
         } catch (error) {
             logger.error("Accounts Failed:-" + error);
@@ -236,17 +307,20 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveItems(accessToken: string, calloutUri: string, businessId:string) {
+    async saveItems(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let items = await myobDataReaderService.getAllItems(accessToken, calloutUri);
+            let items = await myobDataReaderService.getAllItems(accessToken, companyId, startDate, endDate);
 
             if (items) {
                 let parsedItems = new ItemParser().parseItem(items, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItems);
                 logger.info("Items Fetched: businessId: " + businessId)
+                this.saveInvoices(accessToken, businessId, companyId, startDate, endDate);
+            } else {
+                this.saveInvoices(accessToken, businessId, companyId, startDate, endDate);
             }
         } catch (error) {
             logger.error("Items Failed:-" + error);
@@ -259,17 +333,20 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveInvoices(accessToken: string, calloutUri: string, businessId:string) {
+    async saveInvoices(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let Invoices = await myobDataReaderService.getAllInvoices(accessToken, calloutUri);
+            let Invoices = await myobDataReaderService.getAllInvoices(accessToken, companyId, startDate, endDate);
 
             if (Invoices) {
                 let parsedInvoices = new InvoiceParser().parseInvoice(Invoices, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.invoice_bill, OperationType.CREATE, businessId, parsedInvoices);
                 logger.info("Invoices Fetched: businessId: " + businessId)
+                this.saveBills(accessToken, businessId, companyId, startDate, endDate); 
+            } else {
+                this.saveBills(accessToken, businessId, companyId, startDate, endDate); 
             }
         } catch (error) {
             logger.error("Invoices Failed:-" + error);
@@ -282,17 +359,21 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveBills(accessToken: string, calloutUri: string, businessId:string) {
+    async saveBills(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
+            console.log('STEP 2 Bills');
             
             // Call myob api to fetch customers
-            let bills = await myobDataReaderService.getAllBills(accessToken, calloutUri);
+            let bills = await myobDataReaderService.getAllBills(accessToken, companyId, startDate, endDate);
 
             if (bills) {
                 let parsedBills = new BillParser().parseBill(bills, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.invoice_bill, OperationType.CREATE, businessId, parsedBills);
                 logger.info("Bills Fetched: businessId: " + businessId)
+                this.saveCustomerPayments(accessToken, businessId, companyId, startDate, endDate);  
+            } else {
+                this.saveCustomerPayments(accessToken, businessId, companyId, startDate, endDate);  
             }
         } catch (error) {
             logger.error("Bills Failed:-" + error);
@@ -306,17 +387,20 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveCustomerPayments(accessToken: string, calloutUri: string, businessId:string) {
+    async saveCustomerPayments(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let customerPayments = await myobDataReaderService.getAllCustomerPayments(accessToken, calloutUri);
+            let customerPayments = await myobDataReaderService.getAllCustomerPayments(accessToken, companyId, startDate, endDate);
 
             if (customerPayments) {
                 let parsedCustomerPayments = new CustomerPaymentParser().parseCustomerPayment(customerPayments, businessId);
                 
                 this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedCustomerPayments);
                 logger.info("Customer-Payment Fetched: businessId: " + businessId)
+                this.saveSupplierPayments(accessToken, businessId, companyId, startDate, endDate); 
+            } else {
+                this.saveSupplierPayments(accessToken, businessId, companyId, startDate, endDate); 
             }
         } catch (error) {
             logger.error("Customer-Payment Failed:-" + error);
@@ -329,11 +413,11 @@ export class SmaiBusinessService {
      * @param calloutUri 
      * @param businessId 
      */
-    async saveSupplierPayments(accessToken: string, calloutUri: string, businessId:string) {
+    async saveSupplierPayments(accessToken: string, businessId:string, companyId: string, startDate:string, endDate:string) {
         try {
             
             // Call myob api to fetch customers
-            let supplierPayments = await myobDataReaderService.getAllSupplierPayments(accessToken, calloutUri);
+            let supplierPayments = await myobDataReaderService.getAllSupplierPayments(accessToken, companyId, startDate, endDate);
             
             if (supplierPayments) {
                 let parsedSupplierPayments = new SupplierPaymentParser().parseSupplierPayment(supplierPayments, businessId);

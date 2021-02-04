@@ -69,8 +69,8 @@ router.post('/reload/:businessId', async (req: Request, res: Response) => {
         // Sync date must be present in respose
         if (response && response.data.length > 0 && response.data[0].syncDate && response.data[0].businessPlateformId) {
             // Call reload service to relad the business data
-            let reloadResponse = await reloadsbc.reloadCompany(response.data[0].syncDate, req.params.businessId, response.data[0].businessPlateformId,false)
-            res.status(OK).json(reloadResponse)
+           // let reloadResponse = await reloadsbc.reloadCompany(response.data[0].syncDate, req.params.businessId, response.data[0].businessPlateformId,false)
+        //    res.status(OK).json(reloadResponse)
         } else {
             res.status(BAD_REQUEST).json({
                 stats: false,

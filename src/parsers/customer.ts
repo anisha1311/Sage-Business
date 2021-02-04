@@ -18,16 +18,6 @@ export class CustomerParser {
             if (customerInfo && length > 0) {
                 for (let i = 0; i < length; i++) {
                     const customer = customerInfo.Items[i];
-                    // for(let j = 0; j < customer.Addresses.length; j++) {
-                    //     const address = customer.Addresses[j];
-                    //     console.log('address', address);
-                        
-                    //     parsedAddresses.push(this.parseAddress(address, businessId));     
-                    //     console.log('parsedAddresses', parsedAddresses);
-                                           
-                    //     parsedphones.push(this.parsePhones(address, businessId));      
-                    //     console.log('parsedphones', parsedphones);                  
-                    // }
                     parsedCustomers.push(this.parseData(customer, businessId))
                 }                
                 return parsedCustomers;
@@ -76,7 +66,7 @@ export class CustomerParser {
 
         let parseData = {
             "businessId" : businessId,
-            "contactName" : customer.FirstName + ' ' + customer.LastName,    
+            "contactName" : customer.IsIndividual !== false ? customer.FirstName + ' ' + customer.LastName : customer.CompanyName,    
             "isSupplier" : 'false',
             "isCustomer" : 'true',
             "isEmployee" : 'false',

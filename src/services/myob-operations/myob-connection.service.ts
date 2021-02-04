@@ -116,7 +116,7 @@ export class MyobConnectionService {
 	 */
 	async disconnectBusiness(realmId: any): Promise<any> {
 		try {
-			let tokenResponse = await apisvc.getAccessToken(realmId);
+			let tokenResponse = await apisvc.getAccessToken('');
 			console.log(tokenResponse.data.accessToken);
 			let reqParams = {
 				token_type: 'bearer',
