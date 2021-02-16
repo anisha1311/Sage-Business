@@ -6,29 +6,10 @@ import { Constant } from './constants';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 const myobConnectionService = new MyobConnectionService();
 import { DateFormat, TimeUnitKeys } from './enums/comman-enum'
-const OAuthClient = require('intuit-oauth');
-const oauthClient = new OAuthClient({
-    clientId: process.env.QUICKBOOK_CLIENT_ID,
-    clientSecret: process.env.QUICKBOOK_CONSUMERKEY,
-    environment: process.env.QUICKBOOK_CONNECTION_TYPE,
-    redirectUri: process.env.QUICKBOOK_CALLBACK_URL,
-})
 const httpService = new HTTPService()
 import axios from 'axios';
-import qs from 'qs';
-
-const API_URL :any =  process.env.MYOB_API_URL;
-const clientId = process.env.MYOB_CLIENT_ID;
-const grant_type = process.env.MYOB_GRANT_TYPE_R;
-const redirect_uri = process.env.MYOB_CALLBACK_URL;
-const scope = process.env.MYOB_SCOPE;
-const client_secret = process.env.MYOB_CLIENT_SECRETE;
-
 
 export class CommanAPIService {
-    // formatTokens(response: any, realmId: string) {
-    //     throw new Error('Method not implemented.');
-    // }
 
     async formatTokens(data: any, realmId: string) {
         console.log('format');
@@ -75,7 +56,7 @@ export class CommanAPIService {
                 
                 
                 if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
-                    // request for a new token from qb
+                    // request for a new token from myob
                     console.log(responsedata.data.refreshToken);
                     
                     let tokenResponse = await this.refreshTokensByRefreshToken(responsedata.data.refreshToken)
@@ -83,11 +64,11 @@ export class CommanAPIService {
                     
                     if (tokenResponse.result && tokenResponse.result.access_token) {
                         let newtime = new Date().toISOString()
-                        let qbaccessTokenExpiryMinutes = (tokenResponse.token.expires_in / 60)
-                        let qbrefreshTokenExpiryDays = (tokenResponse.token.x_refresh_token_expires_in / (60 * 60 * 24))
+                        let myobaccessTokenExpiryMinutes = (tokenResponse.token.expires_in / 60)
+                        let myobrefreshTokenExpiryDays = (tokenResponse.token.x_refresh_token_expires_in / (60 * 60 * 24))
                         // Create new acesstoken expiry time and refresh token expiry time
-                        let newAccessTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(qbaccessTokenExpiryMinutes, TimeUnitKeys.minutes).format(DateFormat.dateTime);
-                        let newRefreshTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(qbrefreshTokenExpiryDays, TimeUnitKeys.days).format(DateFormat.dateTime);
+                        let newAccessTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(myobaccessTokenExpiryMinutes, TimeUnitKeys.minutes).format(DateFormat.dateTime);
+                        let newRefreshTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(myobrefreshTokenExpiryDays, TimeUnitKeys.days).format(DateFormat.dateTime);
                         // Update the fetched response of token from smai-business-service
                         logger.info('new refresh token fetched: '+ tokenResponse.token.refresh_token + " businessId: " +businessId)
                         responsedata.data.refreshToken = tokenResponse.token.refresh_token
@@ -111,11 +92,11 @@ export class CommanAPIService {
         }
     }
     /**
-     * Get the resource from qb.
+     * Get the resource from myob.
      * @param urlString
      * @param accessToken
      */
-    async getQBResource(urlString: string, accessToken: string) {
+    async getMYOBResource(urlString: string, accessToken: string) {
         
         
         if (process.env.MYOB_API_URL) {
@@ -123,7 +104,7 @@ export class CommanAPIService {
                 url: urlString,
                 method: 'GET',
                 headers: {
-                    'x-myobapi-key': clientId,
+                    'x-myobapi-key': process.env.consumerKey,
                     'x-myobapi-version': 'v2',
                     'Accept-Encoding': 'gzip,deflate',
                     'Authorization': 'Bearer '+accessToken
@@ -170,23 +151,22 @@ export class CommanAPIService {
             let requestBody = {
                 accessToken: data.accessToken,
                 refreshToken: data.refreshToken,
-                expiresAt: data.expiresAt,
+                refreshTokenExpiresAt: data.refreshTokenExpiresAt,
                 accessTokenExpireTime: data.accessTokenExpireTime,
-                userId: data.userId,
+               // userId: data.userId,
                 provider: data.provider,
-                tokenId: data.id
+                //tokenId: data.id
             }
-            console.log('Request data for token updation for business service ' + JSON.stringify(requestBody))
+           // console.log('Request data for token updation for business service ' + JSON.stringify(requestBody))
             let url = stringFormat(Constant.urlConstant.serviceUrl.credentialInfo, [realmId])
-            console.log('url-- api service :::: ', url);
             
-            // let response = await httpService.put(url, requestBody)
-            // console.log('response in update token in smail', response);
+            let response = await httpService.put(url, requestBody)
+            console.log('response in update token', response);
             
-            // if (response) {
-            //     logger.info('New token updated on business-service')
-            //     return response
-            // }
+            if (response) {
+                logger.info('New token updated on business-service')
+                return response
+            }
         } catch (error) {
             logger.error('Error:updateTokenInBusinessService ' + error)
         }
@@ -272,14 +252,14 @@ export class CommanAPIService {
     }
 
     /**
-    * Get Journal Entry data from QB for past year and six month ahead
+    * Get Journal Entry data from myob for past year and six month ahead
     * @param realmId
     */
     async getJournalEntryData(realmId: string, timezone: string, accessToken: string, startDate: string, endDate: string) {
         try {
 
             let url = '' + process.env.QUICKBOOK_API_URL + '/v3/company/' + realmId + '/query?query=select * from JournalEntry Where Metadata.LastUpdatedTime>' + '\'' + startDate + '\'' + 'and Metadata.LastUpdatedTime<' + '\'' + endDate + '\'' + 'Order By Metadata.LastUpdatedTime&minorversion=47'
-            let response = await this.getQBResource(url, accessToken)
+            let response = await this.getMYOBResource(url, accessToken)
             return response
 
         } catch (error) {

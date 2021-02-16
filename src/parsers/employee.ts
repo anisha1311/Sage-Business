@@ -5,7 +5,6 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class EmployeeParser {
-
     /**
      * will parse the Employees
      * @param employeeInfo 
@@ -32,14 +31,12 @@ export class EmployeeParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
      * @param businessId 
      */
     parse(employee: any, businessId: string) {
-
         var employeeAddresses : any = [];
         var employeePhones: any = [];
         for (var i = 0; i<employee.Addresses.length; i++) {
@@ -55,15 +52,12 @@ export class EmployeeParser {
             employeeAddress['state'] =  employee.Addresses[i].State !== '' ? employee.Addresses[i].State : ' ',
             employeeAddress['country'] =  employee.Addresses[i].Country !== '' ? employee.Addresses[i].Country : ' ',
             employeeAddresses.push(employeeAddress);
-
             employeePhone['businessId'] = businessId,
             employeePhone['phoneType']    = 1, 
-            employeePhone['phoneNumber'] =  employee.Addresses[i].Phone1 != '' ? employee.Addresses[i].Phone1 : '1', 
+            employeePhone['phoneNumber'] =  employee.Addresses[i] != '' || employee.Addresses[i] != null ? employee.Addresses[i].Phone1+'' : '1', 
             employeePhone['status'] = 1,        
             employeePhones.push(employeePhone);
         }
-
-
         let parseData = {
             "businessId" : businessId,
             "contactName" : employee.IsIndividual !== false ? employee.FirstName + ' ' + employee.LastName : employee.CompanyName,    
@@ -75,17 +69,10 @@ export class EmployeeParser {
             "contactAddress" : employeeAddresses,
             "contactPhone" : employeePhones,
         }
-
         return parseData;
     }
-
-
-
-  
 }
-
 /*
-
     async parseAddress(address: any, businessId: string) {
         let parseData = {
             "addressType" : null,
@@ -100,7 +87,6 @@ export class EmployeeParser {
         }
         return parseData;
     }
-
     async parsePhones(address: any, businessId: string) {
         let parseData = {
             "phoneType" : null,
@@ -112,4 +98,3 @@ export class EmployeeParser {
         return parseData;
     }
 */
-

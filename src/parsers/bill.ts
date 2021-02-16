@@ -4,8 +4,8 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+var dateFormat = require('dateformat');
 export class BillParser {
-
     /**
      * will parse the Customers
      * @param customerInfo 
@@ -33,7 +33,6 @@ export class BillParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
@@ -44,46 +43,39 @@ export class BillParser {
         let promiseDate : any;
         var lines: any = [];
         if(bill.Date!==null){
-            billDate = bill.Date.split('-');
+            billDate = dateFormat(bill.Date, "yyyy-mm-dd");
         }
         if(bill.PromisedDate !==null){
-            promiseDate = bill.PromisedDate.split('-');
+            promiseDate = dateFormat(bill.PromisedDate, "yyyy-mm-dd")
         }
-
         for (var i = 0; i<bill.Lines.length; i++) {
             var line: any = {};
-            line['description'] =  'description', // bill.Lines[i].Description          
+            line['description'] = bill.Lines[i].Description!== null? bill.Lines[i].Description:'description';       
             line['itemId'] = bill.Lines[i].Item !== null ? bill.Lines[i].Item.UID : '4567890';               
-            line['lineNumber'] = '23'//bill.Lines[i].Item ? bill.Lines[i].Item.Number : 23;  
-            line['lineAmount'] = bill.Lines[i].CostOfGoodsSold;     
-            line['quantity'] = bill.Lines[i].ShipQuantity;  
+            line['lineNumber'] = bill.Lines[i].Item ? bill.Lines[i].Item.Number : 23;  
             line['accountCode'] = '1';
+            line['lineAmount'] = bill.Lines[i].CostOfGoodsSold;     
+            line['quantity'] = bill.Lines[i].ShipQuantity; 
             lines.push(line);
         }
-
-
         let parseData = {
+            'businessId': businessId,
             "number" : bill.Number,
-            "date" :  '01-09-2021',//billDate[1]+'-' + billDate[2].substring(0,2) + '-' + billDate[0],  ,
-            "dueDate" :  '01-09-2021',// promiseDate,
-            "shipDate" :  '01-09-2021', //hardcoded
-            "trackingNo" :   '23456789', //hardcoded
-          //  "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
-            "totalLineItem" :  '2', //hardcoded
-            "lineAmountType" :  '2', //hardcoded
+            "date" :  billDate,  
+            "dueDate" : promiseDate,
+            "shipDate" :  ' ', //hardcoded
+            "trackingNo" :   ' ', //hardcoded
+            "totalLineItem" :  ' ', //hardcoded
+            "lineAmountType" : bill.Category !== null ? bill.Category : ' ' , //hardcoded
             "amount" :  bill.TotalAmount,
             "balance" :  bill.BalanceDueAmount,
             "totalTax" : bill.TotalTax,
             "platformId" :  bill.UID,
             "type" :  '2', ///NEED TO CHECK once again
-            "lines" :  lines
+            "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
+            "lines" :  lines,
+            "currency" : bill.ForeignCurrency
         }
-
         return parseData;
     }
-
-  
 }
-
-
-

@@ -18,7 +18,7 @@ export const getRandomInt = () => {
     return Math.floor(Math.random() * 1_000_000_000_000);
 };
 
-/** Will find an element by Key in NameValue Collection Coming Back from QB by matching arg1
+/** Will find an element by Key in NameValue Collection Coming Back from myob by matching arg1
  * 
  * @param NameValue 
  * @param arg1 

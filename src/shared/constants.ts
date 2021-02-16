@@ -13,7 +13,7 @@ export const Constant = {
     qbResMsg: {
         connectionUrl: 'Url created successfully',
         businessDisconnectFailed: 'Unable to disconnect business from Quickbooks Online',
-        businessDisconnectSuccess: 'Business disconnected from qb successfully'
+        businessDisconnectSuccess: 'Business disconnected from myob successfully'
     },
     busResMsg: {
         addBusiness: 'Business Added successfully',
@@ -45,7 +45,7 @@ export const Constant = {
         rabbitMQRecieverConn: 'receiver-connection',
         rabbitMQSenderConn: 'sender-connection',
         accessTokenLeastMinutes: 4,
-        smaiQbService: 'smai-myob-service',
+        smaiMYOBService: 'smai-myob-service',
         smaiBusinessService: 'smai-business-service',
         emptyQueueName: 'Empty data or new name Supplied',
         smaiClientGateway: 'smai-client-gateway',
@@ -124,7 +124,7 @@ export const Constant = {
         blankZeroDate: '0-00-00',
         invalidDate: 'Invalid date'
     },
-    qbDataGetFailError: {
+    myobDataGetFailError: {
         failedCompanyData: 'Failed to Load company data',
         failedCustomersData: 'Failed to Load customer data',
         failedJVData: 'Failed to Load Journal Reports data',

@@ -3,7 +3,6 @@ import './loadenv'; // Must be the first import
 import app from 'src/server';
 var serveStatic = require('serve-static')
 import logger from '@shared/logger';
-import QBAuthRouter from './routes/myob-auth.route';
 import {QueueReciverConnector} from './services/queues/queue-receiver-connector.service'
 import {QueueSenderConnector} from './services/queues/queue-sender-connector.service'
 import { SmaiBusinessService } from 'src/services/myob-operations/smai.service';

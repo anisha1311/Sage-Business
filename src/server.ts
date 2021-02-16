@@ -62,7 +62,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 const swaggerOptions = {
     swaggerDefinition: {
         info: {
-            title: "smai-qb-service",
+            title: "smai-myob-service",
             description: " API documentation",
             contact: {
                 name: "smai"

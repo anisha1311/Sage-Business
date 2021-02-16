@@ -14,7 +14,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/qb/reload/{businessId}:
+ * /api/myob/reload/{businessId}:
  *   post:
  *     tags:
  *     - "Reload Business Service"
@@ -81,8 +81,8 @@ router.post('/reload/:businessId', async (req: Request, res: Response) => {
     } catch (error) {
         try {
             logger.error("Error Reload:" + error)
-            if (error.authResponse.json.error === Constant.qbDataGetFailError.invalidGrant) {
-                return res.status(400).json({ error: {message:Constant.qbDataGetFailError.invalidGrant,isRefreshTokenExpired:true}, message: Constant.busResMsg.tokenExpiredOnReload, status: false })
+            if (error.authResponse.json.error === Constant.myobDataGetFailError.invalidGrant) {
+                return res.status(400).json({ error: {message:Constant.myobDataGetFailError.invalidGrant,isRefreshTokenExpired:true}, message: Constant.busResMsg.tokenExpiredOnReload, status: false })
             }
             if (error.response)
                 return res.status(error.response.status || BAD_REQUEST).json({ status: false, error: error.response.data.error, message: error.response.data.message })

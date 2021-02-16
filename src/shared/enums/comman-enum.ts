@@ -25,7 +25,7 @@ export enum TimeZone {
 }
 
 export enum ServiceType {
-    smaiQbService = 2
+    smaiMYOBService = 2
 }
 
 export enum DateFormat {

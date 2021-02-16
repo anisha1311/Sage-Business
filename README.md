@@ -1,6 +1,6 @@
-# smai-qb-service
+# smai-myob-service
 
-Qb service helps to connect QB business. This service provides the connection link & then fetch data of all required entities. This data is mapped & pushed to queue for processing by business service
+myob service helps to connect myob business. This service provides the connection link & then fetch data of all required entities. This data is mapped & pushed to queue for processing by business service
 
 * Get connection URL
 * Connect business
@@ -11,7 +11,7 @@ Qb service helps to connect QB business. This service provides the connection li
 
 
 ## Clone the Service
-clone the qb-service with the help of below command on the command prompt :
+clone the myob-service with the help of below command on the command prompt :
 `git clone https://github.com/hashchainft/accounting-integration-boilerplate/`
 
 
@@ -29,7 +29,7 @@ Next you have to setup your env file you can take help from the keys.env for var
 After all setup run project using command  `npm run start:dev`
 
 if you want to run the project in development mode with the help of nodemon then run the project `npm run start:mon`
-and then you see the qb-service running on which port.
+and then you see the myob-service running on which port.
 
 if you want to run the project in Production mode then run the project with following command 
 `npm start`

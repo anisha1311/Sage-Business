@@ -4,8 +4,8 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+var dateFormat = require('dateformat');
 export class CustomerPaymentParser {
-
     /**
      * will parse the Customers
      * @param itemInfo 
@@ -33,31 +33,28 @@ export class CustomerPaymentParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
      * @param businessId 
      */
     parse(customerPayment: any, businessId: string) {
+        let customerPaymentDate;
+        if(customerPayment.Date !== null){
+            customerPaymentDate = dateFormat(customerPayment.Date, "yyyy-mm-dd")
+        }
         let parseData = {
             "businessId" : businessId,
-            "amount" : customerPayment.AmountReceived || 0,
-            "transactionId" :  customerPayment.TransactionUID || '1', //hardcoded
-            "transactionType" :  'Invoice',
-            "refNumber" :  customerPayment.ReceiptNumber || '1', //hardcoded
-            "paymentId" :  customerPayment.UID  || '1', //hardcoded,
-            "paidDate" :   '01-09-2021',        //customerPayment.Date ||
-            "contactId" : customerPayment.Customer!== null ? customerPayment.Customer.UID : '',
-            "bankId" : '1', //hardcoded,
+            "transactionId" :  customerPayment.TransactionUID !== null ? customerPayment.TransactionUID : ' ',
+            "paymentId" :  customerPayment.UID !== null ? customerPayment.UID : ' ', 
+            "paidDate" :   customerPayment.Date !== null ? customerPaymentDate : '0000-00-00',
             "active" :  true,
+            "transactionType" : customerPayment.Invoices.Type !== null ? customerPayment.Invoices.Type : ' ',
+            "refNumber" :  customerPayment.ReceiptNumber !== null ?customerPayment.ReceiptNumber : ' ' ,
+            "contactId" : customerPayment.Customer!== null ? customerPayment.Customer.UID : ' ',
+            "bankId" : ' ',
+            "amount" : customerPayment.AmountReceived !== null ? customerPayment.AmountReceived : ' ',
         }
-
         return parseData;
     }
-
-  
 }
-
-
-

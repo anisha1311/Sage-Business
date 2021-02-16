@@ -25,7 +25,7 @@ export class ChartOfAccountParser {
                 return parsedAccounts;
             }
             else {
-                logger.info("No Chart of Accounts")
+               // logger.info("No Chart of Accounts")
             }
         } catch (error) {
             logger.error(error.stack || error.message)

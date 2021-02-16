@@ -5,7 +5,6 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class PersonalParser {
-
     /**
      * will parse the Customers
      * @param personalInfo 
@@ -31,16 +30,12 @@ export class PersonalParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
-
-    
     /**
      * Parse the Customer
      * @param account 
      * @param businessId 
      */
     parseData(personal: any, businessId: string) {
-
         var personalAddresses : any = [];
         var personalPhones: any = [];
         for (var i = 0; i<personal.Addresses.length; i++) {
@@ -56,14 +51,12 @@ export class PersonalParser {
             personalAddress['state'] =  personal.Addresses[i].State !== '' ? personal.Addresses[i].State : ' ',
             personalAddress['country'] =  personal.Addresses[i].Country !== '' ? personal.Addresses[i].Country : ' ',
             personalAddresses.push(personalAddress);
-
             personalPhone['businessId'] = businessId,
             personalPhone['phoneType']    = 1, //hard code
-            personalPhone['phoneNumber'] =  personal.Addresses[i].Phone1 != '' ? personal.Addresses[i].Phone1 : '1', //hard code
+            personalPhone['phoneNumber'] =  personal.Addresses[i] != '' || personal.Addresses[i] != null ? personal.Addresses[i].Phone1 +'': '1', //hard code
             personalPhone['status'] = 1,        
             personalPhones.push(personalPhone);
         }
-
         let parseData = {
             "businessId" : businessId,
             "contactName" : personal.IsIndividual !== false ? personal.FirstName + ' ' + personal.LastName : personal.CompanyName,    
@@ -75,18 +68,9 @@ export class PersonalParser {
             "contactAddress" : personalAddresses,
             "contactPhone" : personalPhones,
         }
-
         return parseData;
     }
-
-
-  
 }
-
-
-
-
-
  /*   async parseAddress(address: any, businessId: string) {     
         let parseAdd = {
             'businessId':businessId ,    
@@ -101,9 +85,7 @@ export class PersonalParser {
         }
         console.log('parseAdd', parseAdd);
         return parseAdd;
-    
     }
-
     async parsePhones(address: any, businessId: string) {
         let parsePhn = {
             'businessId':businessId ,    
@@ -113,5 +95,4 @@ export class PersonalParser {
             'status': 1,           
         }
         console.log('parsePhn', parsePhn);    
-        
     }*/

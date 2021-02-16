@@ -4,8 +4,8 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+var dateFormat = require('dateformat');
 export class InvoiceParser {
-
     /**
      * will parse the Customers
      * @param customerInfo 
@@ -33,7 +33,6 @@ export class InvoiceParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
@@ -43,11 +42,11 @@ export class InvoiceParser {
         let invoiceDate : any;
         let promiseDate : any;
         var lines: any = [];
-        if(invoice.Date!==null){
-            invoiceDate = invoice.Date.split('-');
+        if(invoice.Date !== null){
+            invoiceDate = dateFormat(invoice.Date, "yyyy-mm-dd");
         }
         if(invoice.PromisedDate !==null){
-            promiseDate = invoice.PromisedDate.split('-');
+            promiseDate = dateFormat(invoice.Date, "yyyy-mm-dd");
         }
         for (var i = 0; i<invoice.Lines.length; i++)
         {
@@ -60,29 +59,22 @@ export class InvoiceParser {
             line['accountCode'] = '1';
             lines.push(line);
         }
-
         let parseData = {
             "number" : invoice.Number,
-            "date" : '01-09-2021',//invoiceDate[1]+'-' + invoiceDate[2].substring(0,2) + '-' + invoiceDate[0], 
-            "dueDate" : '01-09-2021',// promiseDate,
-            "shipDate" :  '01-09-2021', //hardcoded
-            "trackingNo" :  '23456789', //hardcoded
+            "date" : invoiceDate, 
+            "dueDate" : promiseDate,
+            "shipDate" :  ' ', //hardcoded
+            "trackingNo" :  ' ', //hardcoded
            // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
-            "totalLineItem" :  '2', //hardcoded
-            "lineAmountType" :  '2', //hardcoded
+            "totalLineItem" :  ' ', //hardcoded
+            "lineAmountType" :  ' ', //hardcoded
             "amount" :  invoice.TotalAmount,
             "balance" :  invoice.BalanceDueAmount,
             "totalTax" : invoice.TotalTax,
-            "platformId" :  invoice.UID || '2343564',
+            "platformId" :  invoice.UID !== null ? invoice.UID :'123',
             "type" :  '1', ///NEED TO CHECK once again
             "lines" :  lines,
         }
-
         return parseData;
     }
-
-  
 }
-
-
-

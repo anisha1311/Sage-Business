@@ -4,8 +4,8 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+var dateFormat = require('dateformat');
 export class SupplierPaymentParser {
-
     /**
      * will parse the Suppliers
      * @param itemInfo 
@@ -33,32 +33,28 @@ export class SupplierPaymentParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
      * @param businessId 
      */
     parse(supplierPayment: any, businessId: string) {
-        
+        let supplierPaymentDate;
+        if(supplierPayment.Date !== null){
+            supplierPaymentDate = dateFormat(supplierPayment.Date, "yyyy-mm-dd")
+        }
         let parseData = {
             "businessId" : businessId,
             "amount" : supplierPayment.AmountPaid || 0,
             "transactionId" :  supplierPayment.TransactionUID || '1', //hardcoded
-            "transactionType" :  'Bill',
+            "transactionType" :  supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 'Bill',
             "refNumber" :  supplierPayment.PaymentNumber || '1', //hardcoded
             "paymentId" :  supplierPayment.UID  || '1', //hardcoded,
-            "paidDate" :   '01-09-2021',        //supplierPayment.Date ||
+            "paidDate" :  supplierPaymentDate ,        //supplierPayment.Date ||
             "contactId" : supplierPayment.Supplier!== null ? supplierPayment.Supplier.UID : '',
             "bankId" : '1', //hardcoded,
             "active" :  true,
         }
-
         return parseData;
     }
-
-  
 }
-
-
-

@@ -15,7 +15,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/qb/connection-url:
+ * /api/myob/connection-url:
  *   get:
  *     tags:
  *     - "Quickbooks"
@@ -83,7 +83,7 @@ router.get('/', async (req: Request, res: Response) => {
                     }
 
                 
-                  // return res.status(OK).json({ status: true, data: response, message: Constant.qbResMsg.connectionUrl });
+                  // return res.status(OK).json({ status: true, data: response, message: Constant.myobResMsg.connectionUrl });
                 } catch (error) {
                 return res.status(INTERNAL_SERVER_ERROR).json({ status: false, error: error, message: Constant.commanResMsg.somethingWentWrong });
             }
@@ -91,11 +91,11 @@ router.get('/', async (req: Request, res: Response) => {
 
 /*
  * @swagger
- * /api/qb/callback:
+ * /api/myob/callback:
  *   get:
  *     tags:
  *     - "Quickbooks"
- *     summary: Callback url called by qb on company Connect
+ *     summary: Callback url called by myob on company Connect
  *     produces:
  *      - application/json
  *     parameters:

@@ -5,7 +5,6 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class ItemParser {
-
     /**
      * will parse the Customers
      * @param itemInfo 
@@ -33,7 +32,6 @@ export class ItemParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the Customer
      * @param account 
@@ -53,12 +51,6 @@ export class ItemParser {
             "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : '1', //hardcoded
             "expenseAccRefId" :  item.ExpenseAccount !== null ? item.ExpenseAccount.UID : '1', //hardcoded
         }
-
         return parseData;
     }
-
-  
 }
-
-
-

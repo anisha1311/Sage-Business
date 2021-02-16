@@ -2,6 +2,8 @@ import { CommanAPIService } from '@shared/api-service';
 import logger from '@shared/logger';
 import moment from 'moment'
 import * as _ from 'lodash';
+import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
+import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import { EntityType } from '@shared/enums/entity-type-enum';
 import { OperationType } from '@shared/enums/operation-type-enum';
 import { ChartOfAccountParser } from 'src/parsers/account';
@@ -23,9 +25,11 @@ import {  ReloadType } from '@shared/enums/comman-enum';
 import { ReloadServiceKeys } from '@shared/enums/reload-enum';
 const httpService = new HTTPService()
 let apisvc = new CommanAPIService()
+const myobDataReaderService = new MyobDataReaderService();
+const myobConnectionService = new MyobConnectionService();
 export class MonthlReloadService {
 
-    coa: any;
+    public tokenResponse: any = '';
     /**
      * Reload the company based on the sync date of company
      * @param date 
@@ -37,29 +41,26 @@ export class MonthlReloadService {
           // Convert date into required format
           let syncDate = moment(date, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]').subtract(2, 'minutes').format('YYYY-MM-DD[T]HH:mm:ss-00:00');
           console.log('****syncDate****', syncDate);
-
-        let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId])            
-        //let response = await httpService.put(accessTokenUrl, accessTokens);
-          // Get access token
-          let tokenResponse = await apisvc.getAccessToken(realmId);
-          if (tokenResponse.data && tokenResponse.status === true) {
+          this.tokenResponse = await apisvc.getAccessToken(realmId);
+        //  let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId]) 
+       
+          if (this.tokenResponse.data && this.tokenResponse.status === true) {
               console.log('Token data recieved')
               if (isMonthlyReload) {
-                  let res = await this.verifyToken(tokenResponse.data.accessToken, realmId, syncDate)
+                  let res = await this.verifyToken(this.tokenResponse.data.accessToken)
                   if (res) {
-                      let reloadDate = new Date().toISOString()
-                      await this.reloadData(syncDate, tokenResponse, realmId, businessId, ReloadType.monthlyReload, reloadDate)
+                      //start reloading entities
                   } else {
                       logger.info('verify token response was not json')
                       return false
                   }
               } else {
                   // Check if token is valid 
-                  let res = await this.verifyToken(tokenResponse.data.accessToken, realmId, syncDate)
+                  let res = await this.verifyToken(this.tokenResponse.data.accessToken)
                   console.log(res);
                   if (res) {
                       //start reloading entities
-                      this.reloadData(syncDate, tokenResponse, realmId, businessId)
+                      this.reloadData(syncDate, this.tokenResponse, realmId, businessId)
                   } else {
                       logger.info('verify token response was not json')
                       return { data: null, message: Constant.busResMsg.failedReload, status: false }
@@ -78,7 +79,7 @@ export class MonthlReloadService {
 
 
     async reloadData(syncDate: string, tokenResponse: any, realmId: string, businessId: string, reloadType?: ReloadType, monthlyReloadDate?: string) {
-         console.log('In Reload Data');
+        console.log('In Reload Data');
 
         // Fetch all entites & thier reports required for reloading a company
         await this.fetchCustomers(syncDate, tokenResponse, realmId, businessId);
@@ -96,23 +97,29 @@ export class MonthlReloadService {
     /**
      * Fetch Customer from MYOB CDC API 
      */
-    async fetchCustomers(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchCustomers(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            console.log('date', date)
-            console.log('tokenResponse', tokenResponse)
-            console.log('realmId', realmId)
-            console.log('businessId', businessId)
-            // Fecth CDC date for entities from Qb 
-             let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [realmId, date]);
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            if (response) {
-                let parsedCustomers = new CustomerParser().parseCustomer(response.data, businessId);
+            console.log('fetchCustomers');
+            let customers:any;
+            // Call myob api to fetch customers
+            customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
+            console.log('fetchCustomers', customers);
+            if(customers === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (customers.Items.length != 0) {
+                let parsedCustomers = new CustomerParser().parseCustomer(customers, businessId);
                 QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedCustomers);
-                logger.info('      ')
-                logger.info('Customer reloaded : BusinessId: ' + businessId)
-              
+                logger.info("customers Reloaded: businessId: " + businessId)
             }
+
         } catch (error) {
             logger.error(error)
         }
@@ -122,20 +129,25 @@ export class MonthlReloadService {
     /**
        * Fetch Suppliers from MYOB CDC API 
      */
-    async fetchSuppliers(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchSuppliers(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.vendorUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedVendors = new VendorParser().parseVendor(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedVendors);
-                logger.info('      ')
-                logger.info('Vendor reloaded : BusinessId: ' + businessId)
-              
+            let vendors:any;
+            // Call myob api to fetch vendors
+            vendors = await myobDataReaderService.getAllSuppliers(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(vendors === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                vendors = await myobDataReaderService.getAllSuppliers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (vendors.Items.length != 0) {
+                let parsedvendors = new VendorParser().parseVendor(vendors, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedvendors);
+                logger.info("vendors Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -146,20 +158,25 @@ export class MonthlReloadService {
     /**
       * Fetch Employees from MYOB CDC API 
      */
-    async fetchEmployees(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchEmployees(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.employeeUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedEmployees = new EmployeeParser().parseEmployee(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedEmployees);
-                logger.info('      ')
-                logger.info('Employee reloaded : BusinessId: ' + businessId)
-              
+            let employees:any;
+            // Call myob api to fetch vendors
+            employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
+            if(employees === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (employees.Items.length != 0) {
+                let parsedemployee = new EmployeeParser().parseEmployee(employees, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedemployee);
+                logger.info("employees Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -170,20 +187,25 @@ export class MonthlReloadService {
     /**
         * Fetch Contacts from MYOB CDC API 
      */
-    async fetchPersonals(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchPersonals(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.personalUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedPersonals = new PersonalParser().parsePersonal(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedPersonals);
-                logger.info('      ')
-                logger.info('Personal Contact reloaded : BusinessId: ' + businessId)
-              
+            let personals:any;
+            // Call myob api to fetch personals
+            personals = await myobDataReaderService.getAllPersonals(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
+            if(personals === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                personals = await myobDataReaderService.getAllPersonals(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (personals.Items.length != 0) {
+                let parsedPersonal = new PersonalParser().parsePersonal(personals, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedPersonal);
+                logger.info("personals Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -193,20 +215,25 @@ export class MonthlReloadService {
       /**
       * Fetch Accounts from MYOB CDC API 
      */
-    async fetchAccounts(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchAccounts(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.accountUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedAccounts = new ChartOfAccountParser().parseChartofAccounts(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedAccounts);
-                logger.info('      ')
-                logger.info('Account reloaded : BusinessId: ' + businessId)
-              
+            let accounts:any;
+            // Call myob api to fetch accounts
+            accounts = await myobDataReaderService.getAllAccounts(tokenResponse.data.accessToken, realmId, updated_or_created_since);             
+            if(accounts === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                accounts = await myobDataReaderService.getAllAccounts(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (accounts.Items.length != 0) {
+                let parsedAccount = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedAccount);
+                logger.info("accounts Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -216,20 +243,25 @@ export class MonthlReloadService {
         /**
      * Fetch CustomerPayments from MYOB CDC API 
      */
-    async fetchCustomerPayments(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchCustomerPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.customerPaymentUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedCustomerPayments = new CustomerPaymentParser().parseCustomerPayment(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedCustomerPayments);
-                logger.info('      ')
-                logger.info('Customer Payments reloaded : BusinessId: ' + businessId)
-              
+            let customerPayments:any;
+            // Call myob api to fetch items
+            customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(customerPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (customerPayments.Items.length != 0) {
+                let parsedCustomerPayments = new CustomerPaymentParser().parseCustomerPayment(customerPayments, businessId)
+                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedCustomerPayments);
+                logger.info("customer payment Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -239,20 +271,25 @@ export class MonthlReloadService {
         /**
      * Fetch SupplierPayments from MYOB CDC API 
      */
-    async fetchSupplierPayments(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchSupplierPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.vendorPaymentUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedSupplierPayments = new SupplierPaymentParser().parseSupplierPayment(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedSupplierPayments);
-                logger.info('      ')
-                logger.info('Supplier Payments reloaded : BusinessId: ' + businessId)
-              
+            let supplierPayments:any;
+            // Call myob api to fetch items
+            supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(supplierPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (supplierPayments.Items.length != 0) {
+                let parsedSupplierPayments = new SupplierPaymentParser().parseSupplierPayment(supplierPayments, businessId)
+                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedSupplierPayments);
+                logger.info("supplier payment Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -263,21 +300,28 @@ export class MonthlReloadService {
     /**
      * Fetch Invoices from MYOB CDC API 
      */
-    async fetchInvoices(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.invoiceUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedInvoices = new InvoiceParser().parseInvoice(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedInvoices);
-                logger.info('      ')
-                logger.info('Invoices reloaded : BusinessId: ' + businessId)
-              
+            let invoices:any;
+            // Call myob api to fetch items
+            invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
+ 
+            if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (invoices.Items.length != 0) {
+                let parsedInvoice = new InvoiceParser().parseInvoice(invoices, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoice);
+                logger.info("invoices Reloaded: businessId: " + businessId)
             }
+           
         } catch (error) {
             logger.error(error)
         }
@@ -287,20 +331,25 @@ export class MonthlReloadService {
         /**
      * Fetch Bills from MYOB CDC API 
      */
-    async fetchBills(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchBills(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.billUrl, [realmId, date]);
-            
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedBills = new BillParser().parseBill(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedBills);
-                logger.info('      ')
-                logger.info('Bills reloaded : BusinessId: ' + businessId)
-              
+            let bills:any;
+            // Call myob api to fetch items
+            bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(bills === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (bills.Items.length != 0) {
+                let parsedBill = new BillParser().parseBill(bills, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedBill);
+                logger.info("bills Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -310,20 +359,26 @@ export class MonthlReloadService {
         /**
      * Fetch Items from MYOB CDC API 
      */
-    async fetchItems(date: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchItems(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            // Fecth CDC date for entities from Qb 
-            let url = stringFormat(Constant.urlConstant.myobUrl.itemUrl, [realmId, date]);
+            let items:any;
+            // Call myob api to fetch items
+            items = await myobDataReaderService.getAllItems(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
             
-             let response = await apisvc.getQBResource(url, tokenResponse.data.accessToken);
-            
-            if (response) {
-                let parsedItems = new ItemParser().parseItem(response.data, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedItems);
-                logger.info('      ')
-                logger.info('Items reloaded : BusinessId: ' + businessId)
-              
+            if(items === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                items = await myobDataReaderService.getAllItems(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (items.Items.length != 0) {
+                let parsedItem = new ItemParser().parseItem(items, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.item, OperationType.REPLACE, businessId, parsedItem);
+                logger.info("items Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -365,16 +420,16 @@ export class MonthlReloadService {
         }
     }
     /**
-     * Verify if token can fetch data from qb
+     * Verify if token can fetch data from myob
      * @param accessToken
      * @param realmId 
      * @param date 
      */
-    async verifyToken(accessToken: string, realmId: string, date: string) {
+    async verifyToken(accessToken: string) {
         try {
             console.log('*********verifyToken*********');
             let url = Constant.urlConstant.myobUrl.accountRight;
-            let response = await apisvc.getQBResource(url, accessToken)
+            let response = await apisvc.getMYOBResource(url, accessToken)
             // Check for expected response
             if (response) {
                 return true

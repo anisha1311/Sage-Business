@@ -31,14 +31,12 @@ export class VendorParser {
             throw new Error(Constant.parserMsg.parseAccountsError)
         }
     }
-
     /**
      * Parse the COA
      * @param account 
      * @param businessId 
      */
     parse(vendor: any, businessId: string) {
-
         var vendorAddresses : any = [];
         var vendorPhones: any = [];
         for (var i = 0; i<vendor.Addresses.length; i++) {
@@ -54,14 +52,12 @@ export class VendorParser {
             vendorAddress['state'] =  vendor.Addresses[i].State !== '' ? vendor.Addresses[i].State : ' ',
             vendorAddress['country'] =  vendor.Addresses[i].Country !== '' ? vendor.Addresses[i].Country : ' ',
             vendorAddresses.push(vendorAddress);
-
             vendorPhone['businessId'] = businessId,
             vendorPhone['phoneType']    = 1, //hard code
-            vendorPhone['phoneNumber'] =  vendor.Addresses[i].Phone1 != '' ? vendor.Addresses[i].Phone1 : '1', //hard code
+            vendorPhone['phoneNumber'] =  vendor.Addresses[i] != '' || vendor.Addresses[i] != null ? vendor.Addresses[i].Phone1+'' : '1', //hard code
             vendorPhone['status'] = 1,        
             vendorPhones.push(vendorPhone);
         }
-
         let parseData = {
             "businessId" : businessId,
             "contactName" : vendor.IsIndividual !== false ? vendor.FirstName + ' ' + vendor.LastName : vendor.CompanyName,    
@@ -73,13 +69,9 @@ export class VendorParser {
             "contactAddress" : vendorAddresses,
             "contactPhone" : vendorPhones,
         }
-
         return parseData;
     }
-
-  
 }
-
 /**
  * 
  * 
@@ -97,7 +89,6 @@ export class VendorParser {
         }
         return parseData;
     }
-
     async parsePhones(address: any, businessId: string) {
         let parseData = {
             "phoneType" : null,
@@ -108,7 +99,4 @@ export class VendorParser {
         }
         return parseData;
     }
-
  */
-
-

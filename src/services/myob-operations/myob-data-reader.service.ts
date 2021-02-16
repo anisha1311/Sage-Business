@@ -14,14 +14,13 @@ export class MyobDataReaderService {
         try {
             let url = Constant.urlConstant.myobUrl.accountRight;
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
-            console.log('response', response);
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             throw error
@@ -33,7 +32,7 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [companyId, startDate]); //, endDate
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             if (response) {        
                return response;
@@ -41,7 +40,7 @@ export class MyobDataReaderService {
             else {
                 console.log(response);
                 return response;
-               throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+               throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             throw error
@@ -53,7 +52,7 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.vendorUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
                   
             if (response) {
@@ -62,7 +61,7 @@ export class MyobDataReaderService {
             }
             else {
                 console.log('supplier response data reader ::: else ::: ' );
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('supplier response data reader ::: catch ::: ' );
@@ -75,13 +74,13 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.personalUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);            
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -94,14 +93,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.employeeUrl, [companyId, startDate]); //, endDate
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -114,14 +113,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.accountUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -134,14 +133,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.itemUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -154,14 +153,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.invoiceUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -175,14 +174,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.billUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -196,14 +195,14 @@ export class MyobDataReaderService {
         try {
             let url =  stringFormat(Constant.urlConstant.myobUrl.customerPaymentUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);
@@ -217,14 +216,14 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.vendorPaymentUrl, [companyId, startDate]);
             console.log('url--', url);
-            // Make qbo api call
+            // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
                return response;
             }
             else {
-                throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             console.log('error', error);

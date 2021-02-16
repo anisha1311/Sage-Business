@@ -24,7 +24,7 @@ export class QueueDataHandler {
                 entity: entityType,
                 operation: operationType,
                 timestamp: new Date().toISOString(),
-                source: Constant.commanConst.smaiQbService.toString(),
+                source: Constant.commanConst.smaiMYOBService.toString(),
                 destination: Constant.commanConst.smaiBusinessService.toString(),
                 businessId: businessId,
                 reloadType: reloadType,

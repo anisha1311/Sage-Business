@@ -30,7 +30,7 @@ export class ApplicationLogger {
                 file: data.file || 'NA',
                 businessId: data.args && data.args['1'] || 'NA',
                 contentData: data.args && data.args['2'] || 'NA',
-                serviceType: ServiceType.smaiQbService// Service type 1-smai-business-service 2-smai-qb-service,3-smai-xero-service
+                serviceType: ServiceType.smaiMYOBService// Service type 1-smai-business-service 2-smai-myob-service,3-smai-xero-service
             }
             let result = await PostLogs(errrorInfo)
             return result
