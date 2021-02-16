@@ -32,7 +32,7 @@ export class QueueDataHandler {
             },
             data: data
         }
-    
+        console.log('queueData', queueData);
         QueueHandler.sendMessage(process.env.WEBHOOK_SMAI_BUSINESS_QUEUE, queueData);
     }
 

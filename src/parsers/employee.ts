@@ -7,8 +7,8 @@ import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class EmployeeParser {
 
     /**
-     * will parse the Customers
-     * @param customerInfo 
+     * will parse the Employees
+     * @param employeeInfo 
      * @param businessId 
      */
      public parseEmployee(employeeInfo: any, businessId: string) {
@@ -47,34 +47,33 @@ export class EmployeeParser {
             const employeePhone : any = {};
             employeeAddress['businessId'] = businessId
             employeeAddress['addressType'] =  1,
-            employeeAddress['addressLine1'] = employee.Addresses[i].Street !== null && employee.Addresses[i].Street !== ''? employee.Addresses[i].Street : 'Street', //hard coded
-            employeeAddress['addressLine2'] = " " || 'Line2', //hard coded
+            employeeAddress['addressLine1'] = employee.Addresses[i].Street !== ''? employee.Addresses[i].Street : ' ', 
+            employeeAddress['addressLine2'] = ' ', 
             employeeAddress['status'] = 1,
-            employeeAddress['city'] = employee.Addresses[i].City || 'City',
-            employeeAddress['postalCode']    = employee.Addresses[i].Postcode || 'Postcode',
-            employeeAddress['state'] =  employee.Addresses[i].State || 'State',
-            employeeAddress['country'] =  employee.Addresses[i].Country || 'Country',
+            employeeAddress['city'] = employee.Addresses[i].City !== '' ? employee.Addresses[i].City :  ' ',
+            employeeAddress['postalCode']    = employee.Addresses[i].Postcode  !== '' ? employee.Addresses[i].Postcode :  ' ',
+            employeeAddress['state'] =  employee.Addresses[i].State !== '' ? employee.Addresses[i].State : ' ',
+            employeeAddress['country'] =  employee.Addresses[i].Country !== '' ? employee.Addresses[i].Country : ' ',
             employeeAddresses.push(employeeAddress);
 
             employeePhone['businessId'] = businessId,
-            employeePhone['phoneType']    = 1, //hard code
-            employeePhone['phoneNumber'] = '6375372026', //hard code employee.Addresses[i].Phone1 != null ? employee.Addresses[i].Phone1 : 
+            employeePhone['phoneType']    = 1, 
+            employeePhone['phoneNumber'] =  employee.Addresses[i].Phone1 != '' ? employee.Addresses[i].Phone1 : '1', 
             employeePhone['status'] = 1,        
             employeePhones.push(employeePhone);
         }
 
 
         let parseData = {
-
             "businessId" : businessId,
-            "contactName" :  employee.IsIndividual !== false ? employee.FirstName + ' ' + employee.LastName : employee.CompanyName,       
+            "contactName" : employee.IsIndividual !== false ? employee.FirstName + ' ' + employee.LastName : employee.CompanyName,    
             "isSupplier" : 'false',
             "isCustomer" : 'false',
             "isEmployee" : 'true',
             "active" : employee.IsActive,
             "platformContactId" : employee.UID,
             "contactAddress" : employeeAddresses,
-            "contactPhone" : employeePhones
+            "contactPhone" : employeePhones,
         }
 
         return parseData;

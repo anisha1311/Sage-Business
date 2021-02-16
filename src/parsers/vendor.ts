@@ -6,26 +6,25 @@ import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class VendorParser {
     /**
-     * will parse the Customers
+     * will parse the Vendors
      * @param vendorInfo 
      * @param businessId 
      */
      public parseVendor(vendorInfo: any, businessId: string) {
         try {
-            let parsedCustomers: any = [];
+            let parsedVendors: any = [];
             let length = vendorInfo.Items.length || 0;
             console.log('length', length);
             if (vendorInfo && length > 0) {
-                let parsedCustomers: any = [];
                 for (let i = 0; i < length; i++) {
                     const vendor = vendorInfo.Items[i];                  
-                    parsedCustomers.push(this.parse(vendor, businessId))
+                    parsedVendors.push(this.parse(vendor, businessId))
                 }                
-                return parsedCustomers;
+                return parsedVendors;
             }
             else {
-                 return parsedCustomers;
-                //logger.info("No Customers")
+                 return parsedVendors;
+                //logger.info("No Vendors")
             }
         } catch (error) {
             logger.error(error.stack || error.message)
@@ -47,18 +46,18 @@ export class VendorParser {
             const vendorPhone : any = {};
             vendorAddress['businessId'] = businessId
             vendorAddress['addressType'] =  1,
-            vendorAddress['addressLine1'] = vendor.Addresses[i].Street !== null && vendor.Addresses[i].Street !== ''? vendor.Addresses[i].Street : 'Street', //hard coded
-            vendorAddress['addressLine2'] = " " || 'Line2', //hard coded
+            vendorAddress['addressLine1'] = vendor.Addresses[i].Street !== ''? vendor.Addresses[i].Street : ' ', //hard coded
+            vendorAddress['addressLine2'] = ' ', //hard coded
             vendorAddress['status'] = 1,
-            vendorAddress['city'] = vendor.Addresses[i].City || 'City',
-            vendorAddress['postalCode']    = vendor.Addresses[i].Postcode || 'Postcode',
-            vendorAddress['state'] =  vendor.Addresses[i].State || 'State',
-            vendorAddress['country'] =  vendor.Addresses[i].Country || 'Country',
+            vendorAddress['city'] = vendor.Addresses[i].City !== '' ? vendor.Addresses[i].City :  ' ',
+            vendorAddress['postalCode']    = vendor.Addresses[i].Postcode  !== '' ? vendor.Addresses[i].Postcode :  ' ',
+            vendorAddress['state'] =  vendor.Addresses[i].State !== '' ? vendor.Addresses[i].State : ' ',
+            vendorAddress['country'] =  vendor.Addresses[i].Country !== '' ? vendor.Addresses[i].Country : ' ',
             vendorAddresses.push(vendorAddress);
 
             vendorPhone['businessId'] = businessId,
             vendorPhone['phoneType']    = 1, //hard code
-            vendorPhone['phoneNumber'] = '6375372026', //hard code vendor.Addresses[i].Phone1 != null ? vendor.Addresses[i].Phone1 : 
+            vendorPhone['phoneNumber'] =  vendor.Addresses[i].Phone1 != '' ? vendor.Addresses[i].Phone1 : '1', //hard code
             vendorPhone['status'] = 1,        
             vendorPhones.push(vendorPhone);
         }

@@ -7,7 +7,8 @@ export const Constant = {
     commanResMsg: {
         modelInvalid: 'Request model is not valid',
         somethingWentWrong: 'Something went wrong',
-        successfullyFetchedData:'Successfully fetched data.'
+        successfullyFetchedData:'Successfully fetched data.',
+        UnauthorizedStatusCode: 401
     },
     qbResMsg: {
         connectionUrl: 'Url created successfully',
@@ -79,9 +80,9 @@ export const Constant = {
         },
         serviceUrl: {
             businessUrl: process.env.SMAIBaseUrl + '/business/',
-            accessTokenUrl: process.env.SMAIBaseUrl + '/credentials/',
+            accessTokenUrl: process.env.SMAIBaseUrl + '/business/token/{0}',
             coaUrl: process.env.SMAIBaseUrl + '/api/chartofaccounts/{0}',
-            credentialInfo: process.env.SMAIBaseUrl + '/api/credentials',
+            credentialInfo: process.env.SMAIBaseUrl + '/business/token/{0}',
             syncDate: process.env.SMAIBaseUrl + '/api/business/syncdate',
             businessDetails: process.env.SMAIBaseUrl + '/api/business/{0}/details',
             disconnectUrl: process.env.AUTH_BASE_URL + '/api/business/disconnect',
@@ -92,19 +93,19 @@ export const Constant = {
             login: process.env.AUTH_BASE_URL + '/api/users/login',
         },
         myobUrl : {    
-            refreshTokenUrl: 'https://secure.myob.com/oauth2/v1/authorize/',
+            getTokenUrl: 'https://secure.myob.com/oauth2/v1/authorize/',
             accountRight: process.env.MYOB_API_URL + '/accountright',
-            customerUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Customer/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            vendorUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Supplier/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            employeeUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Employee/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            personalUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Personal/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            accountUrl:  process.env.MYOB_API_URL +'/accountright/{0}/GeneralLedger/Account/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            itemUrl: process.env.MYOB_API_URL +'/accountright/{0}/Inventory/Item?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            customerPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/CustomerPayment/?$filter=Date ge datetime\'{1}\' and Date le datetime\'{2}\'',
-            vendorPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/SupplierPayment/?$filter=Date ge datetime\'{1}\' and Date le datetime\'{2}\'',
-            employeePaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/EmployeePaymentDetails/?$filter=Date ge datetime\'{1}\' and Date le datetime\'{2}\'',
-            invoiceUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/Invoice/Item/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
-            billUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/Bill/Item/?$filter=LastModified ge datetime\'{1}\' and LastModified le datetime\'{2}\'',
+            customerUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Customer/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
+            vendorUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Supplier/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
+            employeeUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Employee/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
+            personalUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/Personal/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
+            accountUrl:  process.env.MYOB_API_URL +'/accountright/{0}/GeneralLedger/Account/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
+            itemUrl: process.env.MYOB_API_URL +'/accountright/{0}/Inventory/Item?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
+            customerPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/CustomerPayment/?$filter=Date ge datetime\'{1}\'', //and Date le datetime\'{2}\'
+            vendorPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/SupplierPayment/?$filter=Date ge datetime\'{1}\'', // and Date le datetime\'{2}\'
+            employeePaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/EmployeePaymentDetails/?$filter=Date ge datetime\'{1}\'', // and Date le datetime\'{2}\'
+            invoiceUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/Invoice/Item/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
+            billUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/Bill/Item/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
 
         }
     },

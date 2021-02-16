@@ -3,6 +3,8 @@ import logger from './logger';
 import moment from 'moment';
 import { stringFormat, addMonths } from './functions';
 import { Constant } from './constants';
+import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
+const myobConnectionService = new MyobConnectionService();
 import { DateFormat, TimeUnitKeys } from './enums/comman-enum'
 const OAuthClient = require('intuit-oauth');
 const oauthClient = new OAuthClient({
@@ -24,46 +26,62 @@ const client_secret = process.env.MYOB_CLIENT_SECRETE;
 
 
 export class CommanAPIService {
+    // formatTokens(response: any, realmId: string) {
+    //     throw new Error('Method not implemented.');
+    // }
+
+    async formatTokens(data: any, realmId: string) {
+        console.log('format');
+        
+        let newtime = new Date().toISOString()
+        let sbaccessTokenExpiryMinutes = (data.expires_in / 60)
+        let sbrefreshTokenExpiryDays = (data.refresh_token_expires_in / (60 * 60 * 24))
+        // Create new acesstoken expiry time and refresh token expiry time
+        let newAccessTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(sbaccessTokenExpiryMinutes, TimeUnitKeys.minutes).format(DateFormat.dateTime);
+        let newRefreshTokenExpireTime = moment(newtime, DateFormat.dateTimeIso).add(sbrefreshTokenExpiryDays, TimeUnitKeys.days).format(DateFormat.dateTime);
+        // Update the fetched response of token from smai-business-service
+        data.refreshToken = data.refresh_token
+        data.accessToken = data.access_token
+        data.accessTokenExpireTime = newAccessTokenExpireTime;
+        data.refreshTokenExpiresAt = newRefreshTokenExpireTime;
+        let result = await this.updateTokenInsmaiBusinessService(data, realmId);
+        //console.log('format token result*****', result);
+        return result;
+
+    }
 
     /**
      * To get Access token from smai-business-service
      * @param realmId
      */
-    async getAccessToken(refresh_token:string) {
+    async getAccessToken(realmId: string) {
 
         let businessId = ""
         try {
 
-            var data = qs.stringify({
-                'client_id': clientId,
-                'client_secret': client_secret,
-                'grant_type': 'refresh_token',
-                'refresh_token': refresh_token
-              });
+            let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId])
+            
+            let response = await httpService.get(accessTokenUrl);
+            if (response.data && response.data.data && response.data.status === true) {
 
-            const headervalues :any = { 
-             'Content-Type': 'application/x-www-form-urlencoded'
-            };
-            
-            let refreshTokenUrl: string =Constant.urlConstant.myobUrl.refreshTokenUrl;
-            let response = await httpService.post(refreshTokenUrl, data, headervalues);
-            
-            if (response && response.status === 200) {
-                console.log('response', response);
-                //let responsedata = response.data
-                //businessId = responsedata.data.businessId
-                let expiretime = response.data.expires_in;
+                let responsedata = response.data
+                businessId = responsedata.data.id;
+                let expiretime = responsedata.data.accessTokenExpireTime
                 let currenttime = new Date().toISOString()
-                // by how mucn minutes expire date ahead of current date
+                // by how mucn minutes expire date ahead of current date                
+                
                 let minutes = moment(expiretime).diff(moment(currenttime, DateFormat.dateTimeIso), TimeUnitKeys.minutes);
                 // if four minutes or less remaining for token to be expired then fetch the new token
-                console.log(minutes+ ' minutes left for access token expiry ' + " businessId: "+businessId)
-               if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
+                
+                
+                if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
                     // request for a new token from qb
-                    console.log('hellloooooo');
+                    console.log(responsedata.data.refreshToken);
                     
-                   // let tokenResponse = await this.refreshTokensByRefreshToken(response.data.refresh_token)
-                  /*  if (tokenResponse.token && tokenResponse.token.access_token) {
+                    let tokenResponse = await this.refreshTokensByRefreshToken(responsedata.data.refreshToken)
+                  
+                    
+                    if (tokenResponse.result && tokenResponse.result.access_token) {
                         let newtime = new Date().toISOString()
                         let qbaccessTokenExpiryMinutes = (tokenResponse.token.expires_in / 60)
                         let qbrefreshTokenExpiryDays = (tokenResponse.token.x_refresh_token_expires_in / (60 * 60 * 24))
@@ -77,8 +95,8 @@ export class CommanAPIService {
                         responsedata.data.accessTokenExpireTime = newAccessTokenExpireTime
                         responsedata.data.expiresAt = newRefreshTokenExpireTime
                         // update access token on smai-business-service.
-                        this.updateTokenInsmaiBusinessService(responsedata.data)
-                    }*/
+                        this.updateTokenInsmaiBusinessService(responsedata.data, realmId)
+                    }
                 }
             }
             return response.data
@@ -86,9 +104,9 @@ export class CommanAPIService {
         } catch (error) {
             logger.error(error)
             // Mark status false if error is invalid grant
-            if (error.authResponse.json.error === 'invalid_grant') {
-                this.markBusinessStaus(businessId, '0')
-            }
+            // if (error.authResponse.json.error === 'invalid_grant') {
+            //     this.markBusinessStaus(businessId, '0')
+            // }
             throw error
         }
     }
@@ -98,11 +116,9 @@ export class CommanAPIService {
      * @param accessToken
      */
     async getQBResource(urlString: string, accessToken: string) {
-        console.log('urlString', urlString);
-        console.log('accessToken', accessToken);
         
-        if (process.env.QUICKBOOK_API_URL) {
-            //await oauthClient.setToken({ access_token: accessToken });
+        
+        if (process.env.MYOB_API_URL) {
             return axios({
                 url: urlString,
                 method: 'GET',
@@ -115,7 +131,7 @@ export class CommanAPIService {
             })
         }
         else
-            throw new Error("QUICKBOOK API URL NOT DEFINED");
+            throw new Error("MYOB API URL NOT DEFINED");
     }
 
     /**
@@ -138,15 +154,17 @@ export class CommanAPIService {
      * Fetch new access token by refresh token
      * @param refreshToken
      */
-    async refreshTokensByRefreshToken(refreshToken: string): Promise<any> {
-        return oauthClient.refreshUsingToken(refreshToken);
+    async refreshTokensByRefreshToken(refreshToken: string): Promise<any> {        
+        let response = await myobConnectionService.refreshTokensByRefreshToken(refreshToken);
+        return response;        
+        
     }
 
     /**
      * To update the accesstoken into business-service
      * @param data
      */
-    async updateTokenInsmaiBusinessService(data: any) {
+    async updateTokenInsmaiBusinessService(data: any, realmId: string) {
 
         try {
             let requestBody = {
@@ -159,12 +177,16 @@ export class CommanAPIService {
                 tokenId: data.id
             }
             console.log('Request data for token updation for business service ' + JSON.stringify(requestBody))
-            let url = Constant.urlConstant.serviceUrl.credentialInfo
-            let response = await httpService.patch(url, requestBody)
-            if (response) {
-                logger.info('New token updated on business-service')
-                return response
-            }
+            let url = stringFormat(Constant.urlConstant.serviceUrl.credentialInfo, [realmId])
+            console.log('url-- api service :::: ', url);
+            
+            // let response = await httpService.put(url, requestBody)
+            // console.log('response in update token in smail', response);
+            
+            // if (response) {
+            //     logger.info('New token updated on business-service')
+            //     return response
+            // }
         } catch (error) {
             logger.error('Error:updateTokenInBusinessService ' + error)
         }

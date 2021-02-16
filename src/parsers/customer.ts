@@ -48,18 +48,18 @@ export class CustomerParser {
             const customerPhone : any = {};
             customerAddress['businessId'] = businessId
             customerAddress['addressType'] =  1,
-            customerAddress['addressLine1'] = customer.Addresses[i].Street !== null && customer.Addresses[i].Street !== ''? customer.Addresses[i].Street : 'Street', //hard coded
-            customerAddress['addressLine2'] = " " || 'Line2', //hard coded
+            customerAddress['addressLine1'] = customer.Addresses[i].Street !== ''? customer.Addresses[i].Street : ' ', 
+            customerAddress['addressLine2'] = ' ',
             customerAddress['status'] = 1,
-            customerAddress['city'] = customer.Addresses[i].City || 'City',
-            customerAddress['postalCode']    = customer.Addresses[i].Postcode || 'Postcode',
-            customerAddress['state'] =  customer.Addresses[i].State || 'State',
-            customerAddress['country'] =  customer.Addresses[i].Country || 'Country',
+            customerAddress['city'] = customer.Addresses[i].City !== '' ? customer.Addresses[i].City :  ' ',
+            customerAddress['postalCode']    = customer.Addresses[i].Postcode  !== '' ? customer.Addresses[i].Postcode :  ' ',
+            customerAddress['state'] =  customer.Addresses[i].State !== '' ? customer.Addresses[i].State : ' ',
+            customerAddress['country'] =  customer.Addresses[i].Country !== '' ? customer.Addresses[i].Country : ' ',
             customerAddresses.push(customerAddress);
 
             customerPhone['businessId'] = businessId,
-            customerPhone['phoneType']    = 1, //hard code
-            customerPhone['phoneNumber'] =  customer.Addresses[i].Phone1 != null ? customer.Addresses[i].Phone1 : '6375372026', //hard code
+            customerPhone['phoneType']    = 1, 
+            customerPhone['phoneNumber'] =  customer.Addresses[i].Phone1 != '' ? customer.Addresses[i].Phone1 : '1', 
             customerPhone['status'] = 1,        
             customerPhones.push(customerPhone);
         }

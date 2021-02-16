@@ -3,8 +3,7 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import axios from 'axios';
 
-const clientId:any =  process.env.MYOB_CLIENT_ID;
-const API_URL :any =  process.env.MYOB_API_URL;
+
 export class MyobDataReaderService {
     /**
      *  will return list of preferences
@@ -14,11 +13,12 @@ export class MyobDataReaderService {
         console.log('**********getCompanyInfo***********')
         try {
             let url = Constant.urlConstant.myobUrl.accountRight;
+            console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            
+            console.log('response', response);
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -28,51 +28,57 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllCustomers(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllCustomers(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllCustomers***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.customerUrl, [companyId, startDate]); //, endDate
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            if (response) {
-               return response.data;
+            if (response) {        
+               return response;
             }
             else {
-             //   throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
+                console.log(response);
+                return response;
+               throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
             throw error
         }
     }
 
-    async getAllSuppliers(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllSuppliers(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllSuppliers***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.vendorUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.vendorUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
+                  
             if (response) {
-               return response.data;
+                
+               return response;
             }
             else {
+                console.log('supplier response data reader ::: else ::: ' );
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
             }
         } catch (error) {
+            console.log('supplier response data reader ::: catch ::: ' );
             throw error
         }
     }
 
-    async getAllPersonals(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllPersonals(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllPersonals***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.personalUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.personalUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);            
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -83,16 +89,16 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllEmployees(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllEmployees(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllEmployees***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.employeeUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.employeeUrl, [companyId, startDate]); //, endDate
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -103,16 +109,16 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllAccounts(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllAccounts(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllAccounts***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.accountUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.accountUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -123,16 +129,16 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllItems(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllItems(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllItems***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.itemUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.itemUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -143,16 +149,16 @@ export class MyobDataReaderService {
         }
     }
     
-    async getAllInvoices(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllInvoices(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllInvoices***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.invoiceUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.invoiceUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -163,19 +169,17 @@ export class MyobDataReaderService {
         }
     }
 
-    async getAllBills(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
-        console.log('STEP 2 getAllBills');
+    async getAllBills(token: string, companyId: string, startDate:string): Promise<any> {
         
         console.log('**********getAllBills***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.billUrl, [companyId, startDate, endDate]);
-            console.log('STEP 2 url--', url);
+            let url = stringFormat(Constant.urlConstant.myobUrl.billUrl, [companyId, startDate]);
+            console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
-            console.log('STEP 2 response->>',response.data);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -187,16 +191,16 @@ export class MyobDataReaderService {
     }
 
     
-    async getAllCustomerPayments(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllCustomerPayments(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllCustomerPayments***********')
         try {
-            let url =  stringFormat(Constant.urlConstant.myobUrl.customerPaymentUrl, [companyId, startDate, endDate]);
+            let url =  stringFormat(Constant.urlConstant.myobUrl.customerPaymentUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -208,16 +212,16 @@ export class MyobDataReaderService {
     }
 
       
-    async getAllSupplierPayments(token: string, companyId: string, startDate:string, endDate:string): Promise<any> {
+    async getAllSupplierPayments(token: string, companyId: string, startDate:string): Promise<any> {
         console.log('**********getAllSupplierPayments***********')
         try {
-            let url = stringFormat(Constant.urlConstant.myobUrl.vendorPaymentUrl, [companyId, startDate, endDate]);
+            let url = stringFormat(Constant.urlConstant.myobUrl.vendorPaymentUrl, [companyId, startDate]);
             console.log('url--', url);
             // Make qbo api call
             let response:any = await this.makeApiCall(url, token);
             
             if (response) {
-               return response.data;
+               return response;
             }
             else {
                 throw new Error(Constant.qbDataGetFailError.failedCompanyPrefrence)
@@ -228,22 +232,38 @@ export class MyobDataReaderService {
         }
     }
 
+
+
     /** Make Api Call */
-    makeApiCall(urlString: string, token:string) {
+    async makeApiCall(urlString: string, token:string): Promise<any> {
         try {
-            if (process.env.MYOB_API_URL) {
-                return axios({
-                    url: urlString,
-                    method: 'GET',
-                    headers: {
-                        'x-myobapi-key': clientId,
-                        'x-myobapi-version': 'v2',
-                        'Accept-Encoding': 'gzip,deflate',
-                        'Authorization': 'Bearer '+token
-                    }
-                })
+            if (process.env.MYOB_API_URL) {              
+                
+                return new Promise(function (resolve, reject) {
+                    axios.get(urlString, {
+                        headers: {
+                            'x-myobapi-key': process.env.consumerKey,
+                            'x-myobapi-version': 'v2',
+                            'Accept-Encoding': 'gzip,deflate',
+                            'Authorization': 'Bearer '+token
+                        }
+                    }			
+                  )
+                    .then( 
+                        (response) => { 
+                            var result = response.data; 
+                            resolve(result); 
+                        }, 
+                        (error) => { 
+                            var error = error.response.status;
+                            resolve(error); 
+                            } 
+                        )                    
+                    });  
             }
+           
             else{
+                
                 console.log('error process.env.MYOB_API_URL');
                 throw new Error("MYOB API URL NOT DEFINED");
             }

@@ -126,27 +126,19 @@ export const getDate = function (datestr: string) {
 
 }
 //added by anisha
-export const get3YearAgoDate = function (datestr: string) {
-    try {
-        let date = new Date(datestr);
-        let year = date.getFullYear()-3;
-        let month = date.getMonth() + 1;
-        let dt = date.getDate();
-        let dtstr = ''
-        let monthstr = ''
-        if (dt < 10) {
-            dtstr = '0' + dt;
+export function getThreeYearAgoDate() {
+    var threeYearAgoDate = new Date();
+    let year = threeYearAgoDate.getFullYear();
+    if (threeYearAgoDate.getDate() == 29 && threeYearAgoDate.getMonth() == 1) {
+        if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
+            threeYearAgoDate.setDate(28);
         }
-        if (month < 10) {
-            monthstr = '0' + month;
-        }
-        let formattedDate = year + '-' + monthstr + '-' + dtstr
-        return formattedDate;
-    } catch (error) {
-        throw error
     }
+    threeYearAgoDate.setFullYear(year - 3);
 
+    return threeYearAgoDate.toISOString()
 }
+
 
 export function writeWebHookLogs(item: WebhookModel) {
     fse.outputFile('webhook-logs/' + new Date().toDateString() + '/' + item.platformBusinessId + '/' + item.platformBusinessId + '-' + new Date().getTime() + '.txt', JSON.stringify(item), (err: Error) => {

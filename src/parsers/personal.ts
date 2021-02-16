@@ -48,18 +48,18 @@ export class PersonalParser {
             const personalPhone : any = {};
             personalAddress['businessId'] = businessId
             personalAddress['addressType'] =  1,
-            personalAddress['addressLine1'] = personal.Addresses[i].Street !== null && personal.Addresses[i].Street !== ''? personal.Addresses[i].Street : 'Street', //hard coded
-            personalAddress['addressLine2'] = " " || 'Line2', //hard coded
+            personalAddress['addressLine1'] = personal.Addresses[i].Street !== ''? personal.Addresses[i].Street : ' ', //hard coded
+            personalAddress['addressLine2'] = ' ', //hard coded
             personalAddress['status'] = 1,
-            personalAddress['city'] = personal.Addresses[i].City || 'City',
-            personalAddress['postalCode']    = personal.Addresses[i].Postcode || 'Postcode',
-            personalAddress['state'] =  personal.Addresses[i].State || 'State',
-            personalAddress['country'] =  personal.Addresses[i].Country || 'Country',
+            personalAddress['city'] = personal.Addresses[i].City !== '' ? personal.Addresses[i].City :  ' ',
+            personalAddress['postalCode']    = personal.Addresses[i].Postcode  !== '' ? personal.Addresses[i].Postcode :  ' ',
+            personalAddress['state'] =  personal.Addresses[i].State !== '' ? personal.Addresses[i].State : ' ',
+            personalAddress['country'] =  personal.Addresses[i].Country !== '' ? personal.Addresses[i].Country : ' ',
             personalAddresses.push(personalAddress);
 
             personalPhone['businessId'] = businessId,
             personalPhone['phoneType']    = 1, //hard code
-            personalPhone['phoneNumber'] =  personal.Addresses[i].Phone1 != null ? personal.Addresses[i].Phone1 : '6375372026', //hard code
+            personalPhone['phoneNumber'] =  personal.Addresses[i].Phone1 != '' ? personal.Addresses[i].Phone1 : '1', //hard code
             personalPhone['status'] = 1,        
             personalPhones.push(personalPhone);
         }

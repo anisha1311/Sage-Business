@@ -22,6 +22,11 @@ export class HTTPService {
 
     }
 
+    
+    async put(url: string, requestBody?: any) {
+        return axios.put(url, requestBody)
+    }
+    
     /** Post Method */
     post(url: string, requestBody?: any, options?: any) {
         return axios.post(url, requestBody, options || this.options)

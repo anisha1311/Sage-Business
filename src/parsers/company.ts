@@ -9,21 +9,20 @@ export class CompanyParser {
     * @param companyInfo 
     * @param realmId 
     */
-    public static parseCompany(companyInfo: any) {
+    public static parseCompany(realmId: any,companyInfo: any) {
         try {
             let parseData = {
-                "businessName": " " , //companyInfo.Name !== null ? companyInfo.Name  : 
-                "legalName": " ",
-                "country":  " " , // companyInfo.Country !== null ? companyInfo.Country  : 
+                "businessName": companyInfo.Name !== null && companyInfo.Name !== '' ? companyInfo.Name  : " " , 
+                "legalName": companyInfo.LibraryPath !== null && companyInfo.LibraryPath !== '' ? companyInfo.LibraryPath  : " " , 
+                "country": companyInfo.Country !== null  && companyInfo.Country !== '' ? companyInfo.Country  :  " " , 
                 "email": " ",
-                "fiscalYearStartMonth": " ",
-                "businessStartDate": "2012/12/12",
-                "businessPlateformId": " ",
-                "homeCurrency": "IND",
+                "fiscalYearStartMonth": "January",
+                "businessStartDate": "2012-01-12",
+                "businessPlateformId": realmId,
+                "homeCurrency": companyInfo.Country !== null  && companyInfo.Country !== '' ? companyInfo.Country  :  " " , 
                 "provider": 3,
-                "leadId": " ",
-                "website": "www.getpostman.com/oauth2/callback",
-                "timezone": "IST"
+                "leadId":  companyInfo.LauncherId !== null  &&  companyInfo.LauncherId !== '' ?  companyInfo.LauncherId  :  " " , 
+                "website": companyInfo.Uri !== null  && companyInfo.Uri !== '' ? companyInfo.Uri  :  " " , 
             }
             return parseData;
 
@@ -39,17 +38,20 @@ export class CompanyParser {
     */
     public static parseCompanyAddress(companyInfo: any) {
         try {
-            let companyAdd: any = null;
+            let addressParse=[];
+            let companyAdd: any = null; 
+            
             if (companyInfo){
                 companyAdd = {
-                    addressType: 3,
+                    addressType: 1,
                     city: " ",
                     line1: " ",
                     postalCode: " ",
-                    country: " "
+                    country: companyInfo.Country !== null  && companyInfo.Country !== '' ? companyInfo.Country  :  " " , 
                 }
             }
-            return companyAdd;
+            addressParse.push(companyAdd)
+            return addressParse;
 
         } catch (error) {
             logger.error(error.stack || error.message)

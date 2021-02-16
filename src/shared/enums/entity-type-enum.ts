@@ -4,8 +4,8 @@
 export enum EntityType {
     contact = "CONTACT",
     account = "ACCOUNT",
-    item = "ITEM", //added by anisha
-    invoice_bill = "INVOICES_BILLS", //added by anisha
+    item = "ITEM",
+    invoice="INVOICES_BILLS",
     jv = "JOURNAL",
     trialBalance = "BUSINESS_TRIAL_BALANCES",
     arAging = "AR_RECEIVABLE",
