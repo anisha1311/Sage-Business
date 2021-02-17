@@ -112,7 +112,7 @@ export class SmaiBusinessService {
 
                                    //******** GET ALL accounts Data */
                                    //console.log('accounts OnBoarding Start');
-                            await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
+                                await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
 
 
                                    //******** GET ALL item Data */
