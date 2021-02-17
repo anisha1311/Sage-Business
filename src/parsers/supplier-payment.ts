@@ -47,14 +47,14 @@ export class SupplierPaymentParser {
             "businessId" : businessId,
             "amount" : supplierPayment.AmountPaid || 0,
             "transactionId" :  supplierPayment.TransactionUID || '1', //hardcoded
-            "transactionType" : 'hhh', //supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 'Bill',
+            "transactionType" : 'Bill', //supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 
             "refNumber" :  supplierPayment.PaymentNumber || '1', //hardcoded
             "paymentId" :  supplierPayment.UID  || '1', //hardcoded,
             "paidDate" :  supplierPaymentDate ,        //supplierPayment.Date ||
             "contactId" : supplierPayment.Supplier!== null ? supplierPayment.Supplier.UID : '',
             "bankId" : '1', //hardcoded,
             "active" :  true,
-        }
+        }   
         return parseData;
     }
 }

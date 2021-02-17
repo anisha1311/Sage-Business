@@ -49,7 +49,7 @@ export class CustomerPaymentParser {
             "paymentId" :  customerPayment.UID !== null ? customerPayment.UID : ' ', 
             "paidDate" :   customerPayment.Date !== null ? customerPaymentDate : '1994-10-13',
             "active" :  true,
-            "transactionType" : customerPayment.Invoices.Type !== null ? customerPayment.Invoices.Type : 'Bill',
+            "transactionType" : 'Invoice', //customerPayment.Invoices.Type !== null ? customerPayment.Invoices.Type :
             "refNumber" :  customerPayment.ReceiptNumber !== null ?customerPayment.ReceiptNumber : ' ' ,
             "contactId" : customerPayment.Customer!== null ? customerPayment.Customer.UID : ' ',
             "bankId" : ' ',

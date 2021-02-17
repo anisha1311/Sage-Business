@@ -43,7 +43,7 @@ export class JournalTransactionParser {
             "businessId" : businessId,
             "journalDate" : '2021-02-02',
             "transactionId" :  journalTransaction.UID,
-            "transactionType" : 'hhh', //journalTransaction.Lines !== null ? journalTransaction.Lines.Type : 'Bill',
+            "transactionType" : 'CashPayment', // journalTransaction.Lines !== null ? journalTransaction.Lines.Type : 
             "number" :  1, //hardcoded
             "contactId" : 'hhh', //hardcoded,
             "description" :  'description',        //journalTransaction.Date ||
