@@ -53,7 +53,7 @@ export class PersonalParser {
             personalAddresses.push(personalAddress);
             personalPhone['businessId'] = businessId,
             personalPhone['phoneType']    = 1, //hard code
-            personalPhone['phoneNumber'] =  personal.Addresses[i] != '' || personal.Addresses[i] != null ? personal.Addresses[i].Phone1 +'': '1', //hard code
+            personalPhone['phoneNumber'] = personal.Addresses[i] != null && personal.Addresses[i].Phone1 != null ? personal.Addresses[i].Phone1 +'': '1', //hard code
             personalPhone['status'] = 1,        
             personalPhones.push(personalPhone);
         }

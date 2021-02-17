@@ -232,6 +232,28 @@ export class MyobDataReaderService {
     }
 
 
+    async getAllJournalTransactions(token: string, companyId: string, startDate:string): Promise<any> {
+        console.log('**********getAllJournalTransactions***********')
+        try {
+            let url = stringFormat(Constant.urlConstant.myobUrl.journalUrl, [companyId, startDate]);
+            console.log('url--', url);
+            // Make myob api call
+            let response:any = await this.makeApiCall(url, token);
+            
+            if (response) {
+               return response;
+            }
+            else {
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            console.log('error', error);
+            throw error
+        }
+    }
+
+
+
 
     /** Make Api Call */
     async makeApiCall(urlString: string, token:string): Promise<any> {

@@ -1,6 +1,7 @@
 import { CommanAPIService } from '@shared/api-service';
 import logger from '@shared/logger';
 import moment from 'moment'
+import { JournalTransactionParser } from 'src/parsers/journal-transaction';
 import * as _ from 'lodash';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
@@ -92,6 +93,7 @@ export class MonthlReloadService {
         await this.fetchInvoices(syncDate, tokenResponse, realmId, businessId);
         await this.fetchBills(syncDate, tokenResponse, realmId, businessId);
         await this.fetchItems(syncDate, tokenResponse, realmId, businessId);
+        await this.fetchJournalTransaction(syncDate, tokenResponse, realmId, businessId);
     }
 
     /**
@@ -100,7 +102,6 @@ export class MonthlReloadService {
     async fetchCustomers(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            console.log('fetchCustomers');
             let customers:any;
             // Call myob api to fetch customers
             customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -386,6 +387,34 @@ export class MonthlReloadService {
     }
 
 
+ /**
+     * Fetch Customer from MYOB CDC API 
+     */
+    async fetchJournalTransaction(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
+
+        try {
+            let jouralTransaction:any;
+            // Call myob api to fetch items
+            jouralTransaction = await myobDataReaderService.getAllJournalTransactions(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(jouralTransaction === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refresh_token);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                jouralTransaction = await myobDataReaderService.getAllJournalTransactions(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (jouralTransaction.Items.length != 0) {
+                let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
+                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedJournalTransactions);
+                logger.info("journal transaction Fetched: businessId: " + businessId)
+            }
+
+        } catch (error) {
+            logger.error(error)
+        }
+    }
 
     /**
      * Filter main array into date,txnid & items to delete

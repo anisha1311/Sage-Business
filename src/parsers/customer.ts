@@ -53,7 +53,7 @@ export class CustomerParser {
             customerAddresses.push(customerAddress);
             customerPhone['businessId'] = businessId,
             customerPhone['phoneType']    = 1, 
-            customerPhone['phoneNumber'] =  customer.Addresses[i] != '' || customer.Addresses[i] != null ? customer.Addresses[i].Phone1 + '' : '1', 
+            customerPhone['phoneNumber'] =  customer.Addresses[i] != null && customer.Addresses[i].Phone1 != null ? customer.Addresses[i].Phone1 +'': '1', 
             customerPhone['status'] = 1,        
             customerPhones.push(customerPhone);
         }

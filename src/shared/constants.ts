@@ -106,7 +106,7 @@ export const Constant = {
             employeePaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/EmployeePaymentDetails/?$filter=Date ge datetime\'{1}\'', // and Date le datetime\'{2}\'
             invoiceUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/Invoice/Item/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
             billUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/Bill/Item/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
-
+            journalUrl:process.env.MYOB_API_URL + '/accountright/{0}/GeneralLedger/JournalTransaction/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
         }
     },
     parserMsg: {

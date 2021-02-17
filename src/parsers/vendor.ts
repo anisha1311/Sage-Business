@@ -54,7 +54,7 @@ export class VendorParser {
             vendorAddresses.push(vendorAddress);
             vendorPhone['businessId'] = businessId,
             vendorPhone['phoneType']    = 1, //hard code
-            vendorPhone['phoneNumber'] =  vendor.Addresses[i] != '' || vendor.Addresses[i] != null ? vendor.Addresses[i].Phone1+'' : '1', //hard code
+            vendorPhone['phoneNumber'] =  vendor.Addresses[i] != null && vendor.Addresses[i].Phone1 != null ? vendor.Addresses[i].Phone1 +'': '1', 
             vendorPhone['status'] = 1,        
             vendorPhones.push(vendorPhone);
         }

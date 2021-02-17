@@ -47,7 +47,7 @@ export class SupplierPaymentParser {
             "businessId" : businessId,
             "amount" : supplierPayment.AmountPaid || 0,
             "transactionId" :  supplierPayment.TransactionUID || '1', //hardcoded
-            "transactionType" :  supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 'Bill',
+            "transactionType" : 'hhh', //supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 'Bill',
             "refNumber" :  supplierPayment.PaymentNumber || '1', //hardcoded
             "paymentId" :  supplierPayment.UID  || '1', //hardcoded,
             "paidDate" :  supplierPaymentDate ,        //supplierPayment.Date ||

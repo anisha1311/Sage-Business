@@ -7,6 +7,7 @@ import { ItemParser } from 'src/parsers/item';
 import { InvoiceParser } from 'src/parsers/invoice';
 import { CustomerPaymentParser } from 'src/parsers/customer-payment';
 import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
+import { JournalTransactionParser } from 'src/parsers/journal-transaction';
 import { BillParser } from 'src/parsers/bill';
 import { EmployeeParser } from 'src/parsers/employee';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
@@ -111,7 +112,7 @@ export class SmaiBusinessService {
 
                                    //******** GET ALL accounts Data */
                                    //console.log('accounts OnBoarding Start');
-                               // await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
+                            await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
 
 
                                    //******** GET ALL item Data */
@@ -138,6 +139,10 @@ export class SmaiBusinessService {
                                    //******** GET ALL supplier payment Data */
                                    //console.log('supplier payment OnBoarding Start');
                                 await this.getSupplierPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
+
+                                     //******** GET ALL Journal	transaction Data */
+                                   //console.log('Journal transaction OnBoarding Start');
+                                await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
 
                                 //this.saveCompanyData(realmId, accessTokens.access_token, accessTokens.refresh_token,businessId, this.lastCalloutDate);
                                 let companydata = parsedCompany as any;
@@ -539,8 +544,43 @@ export class SmaiBusinessService {
         } 
     }
 
+    /**
+     * will fetch and save company data over successfully load company
+     */
+    async getJournalTransaction(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
+        await this.saveJournalTransaction(accessTokens, businessId, realmId, updated_or_created_since)
+    }
+   /**
+     * Will parse and get contact
+     * @param accessToken 
+     * @param calloutUri 
+     * @param businessId 
+     */
+    async saveJournalTransaction(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
 
-
+        try {
+            let jouralTransaction:any;
+            // Call myob api to fetch items
+            jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);
+            if(jouralTransaction === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.accessTokens = response;
+                    accessTokens = this.accessTokens;
+                }
+                jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);    
+            } 
+            if (jouralTransaction.Items.length != 0) {
+                let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
+                this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);
+                logger.info("journal transaction Fetched: businessId: " + businessId)
+            }
+           
+        } catch (error) {       
+            logger.error("journal transaction Failed:-" + error);
+        } 
+    }
     /** Will Prepare and send data to queue
      * @param CONTACT 
      * @param CREATE 

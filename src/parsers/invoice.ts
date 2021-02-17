@@ -62,18 +62,19 @@ export class InvoiceParser {
         let parseData = {
             "number" : invoice.Number,
             "date" : invoiceDate, 
-            "dueDate" : promiseDate,
-            "shipDate" :  ' ', //hardcoded
+            "dueDate" :  '1912-12-12',
+            "shipDate" :  '1912-12-12', //hardcoded
             "trackingNo" :  ' ', //hardcoded
            // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
-            "totalLineItem" :  ' ', //hardcoded
-            "lineAmountType" :  ' ', //hardcoded
+            "totalLineItem" :  1, //hardcoded
+            "lineAmountType" : 1, //hardcoded
             "amount" :  invoice.TotalAmount,
             "balance" :  invoice.BalanceDueAmount,
             "totalTax" : invoice.TotalTax,
             "platformId" :  invoice.UID !== null ? invoice.UID :'123',
             "type" :  '1', ///NEED TO CHECK once again
             "lines" :  lines,
+            "currency" : 'INR'
         }
         return parseData;
     }

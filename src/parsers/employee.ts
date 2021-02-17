@@ -54,7 +54,7 @@ export class EmployeeParser {
             employeeAddresses.push(employeeAddress);
             employeePhone['businessId'] = businessId,
             employeePhone['phoneType']    = 1, 
-            employeePhone['phoneNumber'] =  employee.Addresses[i] != '' || employee.Addresses[i] != null ? employee.Addresses[i].Phone1+'' : '1', 
+            employeePhone['phoneNumber'] =   '12', 
             employeePhone['status'] = 1,        
             employeePhones.push(employeePhone);
         }
