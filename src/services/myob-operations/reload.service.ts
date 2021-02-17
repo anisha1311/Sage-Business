@@ -404,7 +404,7 @@ export class MonthlReloadService {
             } 
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
-                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedJournalTransactions);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.transactions, OperationType.REPLACE, businessId, parsedJournalTransactions);
                 logger.info("journal transaction Fetched: businessId: " + businessId)
             }
 
