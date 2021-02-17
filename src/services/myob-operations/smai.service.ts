@@ -84,7 +84,6 @@ export class SmaiBusinessService {
                                 console.log('Compnay already exists');
                                 await reloadsbc.reloadCompany(business.syncDate, business.id, business.businessPlateformId, false)
 
-                                return { status: true, data: response.data.data, message: Constant.busResMsg.updatedBusiness }
                             } else {                              
                                     // New business saved
                                 console.log('New company')
@@ -95,35 +94,35 @@ export class SmaiBusinessService {
                                 
                                 //******** GET ALL CHART OF ACCOUNT */    
                                // console.log('Customer OnBoarding Start');
-                                await this.getCustomerData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getCustomerData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                   //******** GET ALL vendor Data */
                                    //console.log('vendor OnBoarding Start');
-                                await this.getVendorData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getVendorData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                 //******** GET ALL employee Data */
                                    //console.log('employee OnBoarding Start');
-                                await this.getEmployeeData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getEmployeeData(this.accessTokens, businessId, realmId, onBoardDate);
 
 
                                    //******** GET ALL personals Data */
                                    //console.log('personals OnBoarding Start');
-                                await this.getPersonalData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getPersonalData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL accounts Data */
                                    //console.log('accounts OnBoarding Start');
-                                await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
 
 
                                    //******** GET ALL item Data */
                                    //console.log('item OnBoarding Start');
-                                await this.getItemsData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getItemsData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    
 
                                    //******** GET ALL invoice Data */
                                    //console.log('invoice OnBoarding Start');
-                                await this.getInvoicesData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getInvoicesData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    
                                    //******** GET ALL bill Data */
@@ -133,16 +132,16 @@ export class SmaiBusinessService {
 
                                    //******** GET ALL customer payment Data */
                                    //console.log('customer payment OnBoarding Start');
-                                await this.getCustomerPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getCustomerPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
 
 
                                    //******** GET ALL supplier payment Data */
                                    //console.log('supplier payment OnBoarding Start');
-                                await this.getSupplierPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getSupplierPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                      //******** GET ALL Journal	transaction Data */
                                    //console.log('Journal transaction OnBoarding Start');
-                                await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
+                                //await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
 
                                 //this.saveCompanyData(realmId, accessTokens.access_token, accessTokens.refresh_token,businessId, this.lastCalloutDate);
                                 let companydata = parsedCompany as any;

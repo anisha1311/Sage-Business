@@ -61,18 +61,18 @@ export class BillParser {
         let parseData = {
             'businessId': businessId,
             "number" : bill.Number,
-            "date" :  billDate,  
-            "dueDate" : promiseDate,
-            "shipDate" :  ' ', //hardcoded
-            "trackingNo" :   ' ', //hardcoded
-            "totalLineItem" :  ' ', //hardcoded
-            "lineAmountType" : bill.Category !== null ? bill.Category : ' ' , //hardcoded
+            "date" :  bill.billDate !== null || bill.billDate !== ''? billDate :'1944-10-12',  
+            "dueDate" : bill.promiseDate !== null || bill.promiseDate !== ''? promiseDate : '1944-10-12',
+            "shipDate" :  '1944-10-12', //hardcoded
+            "trackingNo" :   12, //hardcoded
+            "totalLineItem" :  1, //hardcoded
+            "lineAmountType" : bill.Category !== null ? bill.Category : 'Bill' , //hardcoded
             "amount" :  bill.TotalAmount,
             "balance" :  bill.BalanceDueAmount,
             "totalTax" : bill.TotalTax,
             "platformId" :  bill.UID,
             "type" :  '2', ///NEED TO CHECK once again
-            "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : '', 
+            "contactID" : bill.Supplier!== null ?  bill.Supplier.UID : ' ', 
             "lines" :  lines,
             "currency" : bill.ForeignCurrency
         }

@@ -56,7 +56,6 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
     
     const url = `${process.env.AUTH_BASE_URL}?client_id=${process.env.consumerKey}&redirect_uri=${process.env.redirect_uri}&response_type=${process.env.response_type}&scope=${process.env.scope}`;
-    console.log('url', url);
     res.redirect(url);
     
    // return (url);
@@ -166,7 +165,6 @@ router.get('/login/callback', async (req: Request, res: Response) => {
             let buff = Buffer.from(queryCode);
             const buffString:any = buff.toString('ascii');
             const code:any = buffString.replace(/\s+/g,'');
-            console.log('Access_Code--', code);
             let response: any = await smaiBusinessService.saveBusiness(code);
         }
 

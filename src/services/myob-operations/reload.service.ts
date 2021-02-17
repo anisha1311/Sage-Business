@@ -41,7 +41,6 @@ export class MonthlReloadService {
         try {
           // Convert date into required format
           let syncDate = moment(date, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]').subtract(2, 'minutes').format('YYYY-MM-DD[T]HH:mm:ss-00:00');
-          console.log('****syncDate****', syncDate);
           this.tokenResponse = await apisvc.getAccessToken(realmId);
         //  let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId]) 
        
@@ -80,7 +79,6 @@ export class MonthlReloadService {
 
 
     async reloadData(syncDate: string, tokenResponse: any, realmId: string, businessId: string, reloadType?: ReloadType, monthlyReloadDate?: string) {
-        console.log('In Reload Data');
 
         // Fetch all entites & thier reports required for reloading a company
         await this.fetchCustomers(syncDate, tokenResponse, realmId, businessId);
@@ -105,7 +103,6 @@ export class MonthlReloadService {
             let customers:any;
             // Call myob api to fetch customers
             customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
-            console.log('fetchCustomers', customers);
             if(customers === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
                 if (response.access_token) {
@@ -456,7 +453,6 @@ export class MonthlReloadService {
      */
     async verifyToken(accessToken: string) {
         try {
-            console.log('*********verifyToken*********');
             let url = Constant.urlConstant.myobUrl.accountRight;
             let response = await apisvc.getMYOBResource(url, accessToken)
             // Check for expected response
