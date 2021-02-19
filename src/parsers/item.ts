@@ -34,7 +34,7 @@ export class ItemParser {
     }
     /**
      * Parse the Customer
-     * @param account 
+     * @param account  
      * @param businessId 
      */
     parse(item: any, businessId: string) {
