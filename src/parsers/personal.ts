@@ -61,7 +61,7 @@ export class PersonalParser {
             "businessId" : businessId,
             "contactName" : personal.IsIndividual !== false ? personal.FirstName + ' ' + personal.LastName : personal.CompanyName,    
             "isSupplier" : 'false',
-            "isCustomer" : 'false',
+            "isCustomer" : 'false',  
             "isEmployee" : 'false',
             "active" : personal.IsActive,
             "platformContactId" : personal.UID,
@@ -69,7 +69,7 @@ export class PersonalParser {
             "contactPhone" : personalPhones,
         }
         return parseData;
-    }
+    } 
 }
  /*   async parseAddress(address: any, businessId: string) {     
         let parseAdd = {
