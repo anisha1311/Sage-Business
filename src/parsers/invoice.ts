@@ -58,7 +58,6 @@ export class InvoiceParser {
             line['lineAmount'] = invoice.Lines[i].CostOfGoodsSold;     
             line['quantity'] = invoice.Lines[i].ShipQuantity;  
             line['accountCode'] = '1';
-            console.log('promiseDate->',promiseDate)
             lines.push(line);
         }
         let parseData = {
