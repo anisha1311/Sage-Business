@@ -41,19 +41,19 @@ export class SupplierPaymentParser {
     parse(supplierPayment: any, businessId: string) {
         let supplierPaymentDate;
         if(supplierPayment.Date !== null){
-            supplierPaymentDate = dateFormat(supplierPayment.Date, "yyyy-mm-dd")
+            supplierPaymentDate = dateFormat(supplierPayment.Date, "yyyy-mm-dd");
         }
         let parseData = {
             "businessId" : businessId,
-            "amount" : supplierPayment.AmountPaid || 0,
-            "transactionId" :  supplierPayment.TransactionUID || '1', //hardcoded
-            "transactionType" : 'Bill', //supplierPayment.Lines !== null ? supplierPayment.Lines.Type : 
-            "refNumber" :  supplierPayment.PaymentNumber || '1', //hardcoded
-            "paymentId" :  supplierPayment.UID  || '1', //hardcoded,
+            "transactionId" : supplierPayment.TransactionUID !== undefined ? supplierPayment.TransactionUID+'' : '1', //hardcoded
+            "paymentId" : supplierPayment.UID !== null ? supplierPayment.UID : '1', //hardcoded,
             "paidDate" :  supplierPaymentDate ,        //supplierPayment.Date ||
-            "contactId" : supplierPayment.Supplier!== null ? supplierPayment.Supplier.UID : '',
-            "bankId" : '1', //hardcoded,
             "active" :  true,
+            "transactionType" :  supplierPayment.Lines.Type !== undefined ? supplierPayment.Lines.Type : 'Bill',
+            "refNumber" : supplierPayment.PaymentNumber !== null ? supplierPayment.PaymentNumber : '', //hardcoded
+            "contactId" : supplierPayment.Supplier!== null ? supplierPayment.Supplier.UID : '',
+            "bankId" : '', //hardcoded,
+            "amount" : supplierPayment.AmountPaid !== null || supplierPayment.AmountPaid !== '' ? supplierPayment.AmountPaid : 0,
         }   
         return parseData;
     }

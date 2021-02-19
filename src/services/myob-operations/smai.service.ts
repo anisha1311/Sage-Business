@@ -192,7 +192,7 @@ export class SmaiBusinessService {
             if (customers.Items.length != 0) {
                 let parsedCustomers = new CustomerParser().parseCustomer(customers, businessId);
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedCustomers);
-                logger.info("customers Fetched: businessId: " + businessId)
+                //logger.info("customers Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -228,7 +228,7 @@ export class SmaiBusinessService {
             if (vendors.Items.length != 0) {
                 let parsedvendors = new VendorParser().parseVendor(vendors, businessId);
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedvendors);
-                logger.info("vendors Fetched: businessId: " + businessId)
+                //logger.info("vendors Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -267,7 +267,7 @@ export class SmaiBusinessService {
             if (employees.Items.length != 0) {
                 let parsedemployee = new EmployeeParser().parseEmployee(employees, businessId);
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedemployee);
-                logger.info("employees Fetched: businessId: " + businessId)
+                //logger.info("employees Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -306,7 +306,7 @@ export class SmaiBusinessService {
             if (personals.Items.length != 0) {
                 let parsedPersonal = new PersonalParser().parsePersonal(personals, businessId);
                 this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedPersonal);
-                logger.info("personals Fetched: businessId: " + businessId)
+                //logger.info("personals Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -346,7 +346,7 @@ export class SmaiBusinessService {
             if (accounts.Items.length != 0) {
                 let parsedAccount = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
                 this.prepareAndSendQueueData(EntityType.account, OperationType.CREATE, businessId, parsedAccount);
-                logger.info("accounts Fetched: businessId: " + businessId)
+                //logger.info("accounts Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -386,7 +386,7 @@ export class SmaiBusinessService {
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
                 this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItem);
-                logger.info("items Fetched: businessId: " + businessId)
+                //logger.info("items Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -423,7 +423,7 @@ export class SmaiBusinessService {
             if (invoices.Items.length != 0) {
                 let parsedInvoice = new InvoiceParser().parseInvoice(invoices, businessId);
                 this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoice);
-                logger.info("invoices Fetched: businessId: " + businessId)
+                //logger.info("invoices Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -460,7 +460,7 @@ export class SmaiBusinessService {
             if (bills.Items.length != 0) {
                 let parsedBill = new BillParser().parseBill(bills, businessId);
                 this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedBill);
-                logger.info("bills Fetched: businessId: " + businessId)
+                //logger.info("bills Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -497,7 +497,7 @@ export class SmaiBusinessService {
             if (customerPayments.Items.length != 0) {
                 let parsedCustomerPayments = new CustomerPaymentParser().parseCustomerPayment(customerPayments, businessId)
                 this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedCustomerPayments);
-                logger.info("customer payment Fetched: businessId: " + businessId)
+                //logger.info("customer payment Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -535,7 +535,7 @@ export class SmaiBusinessService {
             if (supplierPayments.Items.length != 0) {
                 let parsedSupplierPayments = new SupplierPaymentParser().parseSupplierPayment(supplierPayments, businessId)
                 this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedSupplierPayments);
-                logger.info("supplier payment Fetched: businessId: " + businessId)
+                //logger.info("supplier payment Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -573,7 +573,7 @@ export class SmaiBusinessService {
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);
-                logger.info("journal transaction Fetched: businessId: " + businessId)
+                //logger.info("journal transaction Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -607,7 +607,7 @@ export class SmaiBusinessService {
             },
             data: data
         }
-        console.log('queueData--', queueData);
+        //console.log('queueData--', queueData);
 
         QueueHandler.sendMessage(process.env.QUEUE_NAME, queueData);
     }

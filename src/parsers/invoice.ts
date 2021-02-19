@@ -47,6 +47,7 @@ export class InvoiceParser {
         }
         if(invoice.PromisedDate !==null){
             promiseDate = dateFormat(invoice.Date, "yyyy-mm-dd");
+            console.log('invoice due date is->',promiseDate);
         }
         for (var i = 0; i<invoice.Lines.length; i++)
         {
@@ -57,15 +58,16 @@ export class InvoiceParser {
             line['lineAmount'] = invoice.Lines[i].CostOfGoodsSold;     
             line['quantity'] = invoice.Lines[i].ShipQuantity;  
             line['accountCode'] = '1';
+            console.log('promiseDate->',promiseDate)
             lines.push(line);
         }
         let parseData = {
             "number" : invoice.Number,
-            "date" : invoiceDate, 
-            "dueDate" :  '1912-12-12',
+            "date" : invoiceDate !== null || invoiceDate !== '' ? invoiceDate : '1994-10-10', 
+            "dueDate" : promiseDate !== undefined ? promiseDate : '2020-09-09',
             "shipDate" :  '1912-12-12', //hardcoded
             "trackingNo" :  ' ', //hardcoded
-           // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID : '', 
+           // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID+'' : '', 
             "totalLineItem" :  1, //hardcoded
             "lineAmountType" : 1, //hardcoded
             "amount" :  invoice.TotalAmount,

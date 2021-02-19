@@ -44,7 +44,7 @@ export class ChartOfAccountParser {
             'platformAccountId': account.UID,
             'name': account.Name,
             'accountSubType':  1, //  account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): ''
-            'classification':  'Liability', //account.Classification ||
+            'classification':  'Liability', //account.Classification 
             'active': account.IsActive,           
             'parentAccountId': account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): 1 ,
             'parentAccountName':  'Bank', // account.ParentAccount!== null?  account.ParentAccount.Name ://hardcoded

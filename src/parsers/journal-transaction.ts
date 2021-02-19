@@ -41,14 +41,14 @@ export class JournalTransactionParser {
        
         let parseData = {
             "businessId" : businessId,
-            "journalDate" : '2021-02-02',
+            "journalDate" : '2021-02-02', //journalTransaction.DatePosted
             "transactionId" :  journalTransaction.UID,
-            "transactionType" : 'CashPayment', // journalTransaction.Lines !== null ? journalTransaction.Lines.Type : 
+            "transactionType" : journalTransaction.Lines !== null ? journalTransaction.Lines.SourceTransaction.TransactionType : 'CashPayment',
             "number" :  1, //hardcoded
             "contactId" : 'hhh', //hardcoded,
-            "description" :  'description',        //journalTransaction.Date ||
-            "accountId" : 'hhh',
-            "amount" : '1', //hardcoded,
+            "description" : journalTransaction.Description !== undefined ? journalTransaction.Description : 'description',
+            "accountId" : journalTransaction.Lines.Account.UID !== undefined ? journalTransaction.Lines.Account.UID : 1,
+            "amount" : journalTransaction.Lines.Amount !== undefined ? journalTransaction.Lines.Amount : 1,
             "isReconciled" :  true,
         }
         return parseData;

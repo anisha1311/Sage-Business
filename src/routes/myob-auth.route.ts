@@ -155,7 +155,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/login/callback', async (req: Request, res: Response) => {
     //router.get('/callback', async (req: Request, res: Response) => {
-        console.log('login callback');
+       // console.log('login callback');
         
     try {
 

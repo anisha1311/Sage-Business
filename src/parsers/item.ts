@@ -38,14 +38,15 @@ export class ItemParser {
      * @param businessId 
      */
     parse(item: any, businessId: string) {
+        
         let parseData = {
             "businessId" : businessId,
             "platformId" : item.UID,
             "name" :  item.Name,
             "type" :  ' ',
             "fullName" :  item.Name,
-            "salePrice" :  item.BaseSellingPrice || 1, //hardcoded
-            "purchasePrice" :  item.LastPurchasePrice || 1, //hardcoded
+            "salePrice" :  item.BaseSellingPrice !== null || item.BaseSellingPrice !== '' ? item.BaseSellingPrice : 1, //hardcoded
+            "purchasePrice" : item.LastPurchasePrice !== undefined ? item.LastPurchasePrice : 1, //hardcoded
             "isSold" :  item.IsSold,
             "isPurchased" :  item.IsBought,
             "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : '1', //hardcoded
