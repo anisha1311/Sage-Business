@@ -1,6 +1,6 @@
 import { HTTPService } from '@shared/http-service'; 
 import logger from './logger';
-import moment from 'moment';
+import moment from 'moment'; 
 import { stringFormat, addMonths } from './functions';
 import { Constant } from './constants';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
