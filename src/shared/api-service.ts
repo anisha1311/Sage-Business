@@ -9,7 +9,7 @@ import { DateFormat, TimeUnitKeys } from './enums/comman-enum'
 const httpService = new HTTPService()
 import axios from 'axios';
 
-export class CommanAPIService {
+export class CommanAPIService { 
 
     async formatTokens(data: any, realmId: string) {
         let newtime = new Date().toISOString()
