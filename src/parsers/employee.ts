@@ -10,7 +10,7 @@ export class EmployeeParser {
      * @param employeeInfo 
      * @param businessId 
      */
-     public parseEmployee(employeeInfo: any, businessId: string) {
+     public parseEmployee(employeeInfo: any, businessId: string) {  
         try {
             let parsedEmployees: any = [];
             let length = employeeInfo.Items.length || 0;
