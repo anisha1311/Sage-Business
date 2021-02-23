@@ -15,7 +15,6 @@ export class SupplierPaymentParser {
         try {
             let parsedSupplierPayments: any = [];
             let length = supplierPaymentInfo.Items.length || 0;
-            console.log('length', length);
             if (supplierPaymentInfo && length > 0) {
                 let parsedCustomers: any = [];
                 for (let i = 0; i < length; i++) {

@@ -15,7 +15,6 @@ export class InvoiceParser {
         try {
             let parsedInvoices: any = [];
             let length = invoiceInfo.Items.length || 0;
-            console.log('length', length);
             if (invoiceInfo && length > 0) {
                 let parsedInvoices: any = [];
                 for (let i = 0; i < length; i++) {
@@ -47,7 +46,6 @@ export class InvoiceParser {
         }
         if(invoice.PromisedDate !==null){
             promiseDate = dateFormat(invoice.Date, "yyyy-mm-dd");
-            console.log('invoice due date is->',promiseDate);
         }
         for (var i = 0; i<invoice.Lines.length; i++)
         {

@@ -57,7 +57,6 @@ export class MonthlReloadService {
               } else {
                   // Check if token is valid 
                   let res = await this.verifyToken(this.tokenResponse.data.accessToken)
-                  console.log(res);
                   if (res) {
                       //start reloading entities
                       this.reloadData(syncDate, this.tokenResponse, realmId, businessId)

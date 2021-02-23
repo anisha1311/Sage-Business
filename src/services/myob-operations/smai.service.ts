@@ -51,7 +51,6 @@ export class SmaiBusinessService {
             let companyInfo = await myobDataReaderService.getCompanyInfo(this.accessTokens.access_token);
             if(companyInfo){
                 let length = companyInfo.length || 0;
-                console.log('length', length);
                 if (companyInfo && length > 0) {
                     for (let i = 0; i < length; i++) {
                         const company = companyInfo[i];
@@ -607,8 +606,6 @@ export class SmaiBusinessService {
             },
             data: data
         }
-        //console.log('queueData--', queueData);
-
         QueueHandler.sendMessage(process.env.QUEUE_NAME, queueData);
     }
 }

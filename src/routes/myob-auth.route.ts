@@ -63,31 +63,6 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 
-   /*     router.get('/', async (req: Request, res: Response) => {
-        // router.get('/connection-url', async (req: Request, res: Response) => {
-            
-                try {
-                    let timezone = TimeZone.default;
-                    // To get connection url from myob
-
-                    if( smaiBusinessService.access_token && smaiBusinessService.refresh_token)
-                    {
-                        console.log('Have AccessToken and Refresh Token ');
-                        let response = await smaiBusinessService.saveBusiness('false', smaiBusinessService.access_token , smaiBusinessService.refresh_token, timezone);
-                    }
-                    else
-                    {                        
-                        const authUri = await myobConnectionService.getConnectURL();
-                        res.redirect(authUri);
-                    }
-
-                
-                  // return res.status(OK).json({ status: true, data: response, message: Constant.myobResMsg.connectionUrl });
-                } catch (error) {
-                return res.status(INTERNAL_SERVER_ERROR).json({ status: false, error: error, message: Constant.commanResMsg.somethingWentWrong });
-            }
-        });*/
-
 /*
  * @swagger
  * /api/myob/callback:
@@ -154,10 +129,7 @@ router.get('/', async (req: Request, res: Response) => {
  *            description: any error.
  */
 router.get('/login/callback', async (req: Request, res: Response) => {
-    //router.get('/callback', async (req: Request, res: Response) => {
-       // console.log('login callback');
-        
-    try {
+       try {
 
         const queryCode: string = req.query.code! as string;
         if (queryCode) {

@@ -15,7 +15,6 @@ export class JournalTransactionParser {
         try {
             let parsedJournalTransactions: any = [];
             let length = journalTransactionInfo.Items.length || 0;
-            console.log('length', length);
             if (journalTransactionInfo && length > 0) {
                 for (let i = 0; i < length; i++) {
                     const journalTransaction = journalTransactionInfo.Items[i];

@@ -14,7 +14,6 @@ export class EmployeeParser {
         try {
             let parsedEmployees: any = [];
             let length = employeeInfo.Items.length || 0;
-            console.log('length', length);
             if (employeeInfo && length > 0) {
                 for (let i = 0; i < length; i++) {
                     const employee = employeeInfo.Items[i];               

@@ -15,7 +15,6 @@ export class BillParser {
         try {
             let parsedBills: any = [];
             let length = billInfo.Items.length || 0;
-            console.log('length', length);
             if (billInfo && length > 0) {
                 let parsedInvoices: any = [];
                 for (let i = 0; i < length; i++) {

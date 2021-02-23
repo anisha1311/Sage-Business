@@ -12,8 +12,6 @@ import axios from 'axios';
 export class CommanAPIService {
 
     async formatTokens(data: any, realmId: string) {
-        console.log('format');
-        
         let newtime = new Date().toISOString()
         let sbaccessTokenExpiryMinutes = (data.expires_in / 60)
         let sbrefreshTokenExpiryDays = (data.refresh_token_expires_in / (60 * 60 * 24))
@@ -26,7 +24,6 @@ export class CommanAPIService {
         data.accessTokenExpireTime = newAccessTokenExpireTime;
         data.refreshTokenExpiresAt = newRefreshTokenExpireTime;
         let result = await this.updateTokenInsmaiBusinessService(data, realmId);
-        //console.log('format token result*****', result);
         return result;
 
     }
@@ -57,8 +54,6 @@ export class CommanAPIService {
                 
                 if (minutes <= Constant.commanConst.accessTokenLeastMinutes) {
                     // request for a new token from myob
-                    console.log(responsedata.data.refreshToken);
-                    
                     let tokenResponse = await this.refreshTokensByRefreshToken(responsedata.data.refreshToken)
                   
                     
@@ -157,12 +152,9 @@ export class CommanAPIService {
                 provider: data.provider,
                 //tokenId: data.id
             }
-           // console.log('Request data for token updation for business service ' + JSON.stringify(requestBody))
             let url = stringFormat(Constant.urlConstant.serviceUrl.credentialInfo, [realmId])
             
-            let response = await httpService.put(url, requestBody)
-            console.log('response in update token', response);
-            
+            let response = await httpService.put(url, requestBody)            
             if (response) {
                 logger.info('New token updated on business-service')
                 return response

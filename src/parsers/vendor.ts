@@ -14,7 +14,6 @@ export class VendorParser {
         try {
             let parsedVendors: any = [];
             let length = vendorInfo.Items.length || 0;
-            console.log('length', length);
             if (vendorInfo && length > 0) {
                 for (let i = 0; i < length; i++) {
                     const vendor = vendorInfo.Items[i];                  

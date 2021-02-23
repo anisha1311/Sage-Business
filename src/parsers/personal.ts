@@ -71,28 +71,3 @@ export class PersonalParser {
         return parseData;
     } 
 }
- /*   async parseAddress(address: any, businessId: string) {     
-        let parseAdd = {
-            'businessId':businessId ,    
-            'addressType': " " || 'test',
-            'addressLine1': address.Street !== null && address.Street !== ''? address.Street : 'Street', //hard coded
-            'addressLine2': " " || 'Line2', //hard coded
-            'status': 1,
-            'city': address.City !== null ? address.City : 'City', //hard coded
-            'postalCode': address.Postcode != null ? address.PostCode : 'PostCode', //hard coded
-            'state': address.State != null ? address.State : 'State', //hard coded
-            'country': address.Country != null ? address.Country :'Country', //hard coded   
-        }
-        console.log('parseAdd', parseAdd);
-        return parseAdd;
-    }
-    async parsePhones(address: any, businessId: string) {
-        let parsePhn = {
-            'businessId':businessId ,    
-            'phoneType': 1, //hard code
-            'phoneNumber': address.Phone1 != null ? address.Phone1 : '6375372026', //hard code
-            //'phoneCountryCode': null,
-            'status': 1,           
-        }
-        console.log('parsePhn', parsePhn);    
-    }*/

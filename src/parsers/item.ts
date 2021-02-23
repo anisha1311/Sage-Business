@@ -14,7 +14,6 @@ export class ItemParser {
         try {
             let parsedItems: any = [];
             let length = itemInfo.Items.length || 0;
-            console.log('length', length);
             if (itemInfo && length > 0) {
                 let parsedCustomers: any = [];
                 for (let i = 0; i < length; i++) {
