@@ -3,11 +3,11 @@ import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum'; 
+import { ChartOfAccountKeys } from '@shared/enums/parser-enum';   
 export class EmployeeParser {
     /**
      * will parse the Employees
-     * @param employeeInfo 
+     * @param employeeInfo  
      * @param businessId 
      */
      public parseEmployee(employeeInfo: any, businessId: string) {  
