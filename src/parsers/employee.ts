@@ -71,29 +71,3 @@ export class EmployeeParser {
         return parseData;
     }
 }
-/*
-    async parseAddress(address: any, businessId: string) {
-        let parseData = {
-            "addressType" : null,
-            "addressLine1" : address.Street,
-            "addressLine2" : null,
-            "status" : null,
-            "city" :  address.City,
-            "postalCode" :  address.PostCode,
-            "state" :  address.State,
-            "country" :  address.Country,
-            "businessId" : businessId,
-        }
-        return parseData;
-    }
-    async parsePhones(address: any, businessId: string) {
-        let parseData = {
-            "phoneType" : null,
-            "phoneNumber" : address.Phone1,
-            "phoneCountryCode" : null,
-            "status" : null,
-            "businessId" : businessId,
-        }
-        return parseData;
-    }
-*/
