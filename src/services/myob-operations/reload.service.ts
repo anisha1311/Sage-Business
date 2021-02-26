@@ -1,6 +1,6 @@
 import { CommanAPIService } from '@shared/api-service';
 import logger from '@shared/logger';
-import moment from 'moment'
+import moment from 'moment'  
 import { JournalTransactionParser } from 'src/parsers/journal-transaction';
 import * as _ from 'lodash';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
