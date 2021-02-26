@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import { EntityType } from '@shared/enums/entity-type-enum';
-import { OperationType } from '@shared/enums/operation-type-enum';
+import { OperationType } from '@shared/enums/operation-type-enum';  
 import { ChartOfAccountParser } from 'src/parsers/account';
 import { QueueDataHandler } from '@shared/queue-data-service';
 import { ContactParser } from 'src/parsers/contact';
