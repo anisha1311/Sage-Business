@@ -165,7 +165,7 @@ export class SmaiBusinessService {
             if (customers.Items.length != 0) {
                 contactsData.push({value: customers , label: 'customer'})
                 //logger.info("customers Fetched--->" + customers.Items.length)
-            }
+            }  
             
             let vendors:any;
             // Call myob api to fetch vendors
