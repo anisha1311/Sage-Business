@@ -176,7 +176,7 @@ export class SmaiBusinessService {
                     apisvc.formatTokens(response, realmId);
                     this.accessTokens = response;
                     accessTokens = this.accessTokens;
-                }
+                }  
                 vendors = await myobDataReaderService.getAllSuppliers(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (vendors.Items.length != 0) {
