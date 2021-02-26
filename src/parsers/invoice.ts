@@ -14,12 +14,14 @@ export class InvoiceParser {
      public parseInvoice(invoiceInfo: any, businessId: string) {
         try {
             let parsedInvoices: any = [];
-            let length = invoiceInfo.Items.length || 0;
+            let length = invoiceInfo.length || 0;
             if (invoiceInfo && length > 0) {
-                let parsedInvoices: any = [];
+                //let parsedInvoices: any = [];
                 for (let i = 0; i < length; i++) {
-                    const invoice = invoiceInfo.Items[i];
-                    parsedInvoices.push(this.parse(invoice, businessId))
+                    for(let invoiceIndex = 0;invoiceIndex < invoiceInfo[i].value.Items.length; invoiceIndex++){
+                        const customer = invoiceInfo[i].value.Items[invoiceIndex];
+                        parsedInvoices.push(this.parse(customer, businessId, invoiceInfo[i].label))
+                    }
                 }                
                 return parsedInvoices;
             }
@@ -37,7 +39,7 @@ export class InvoiceParser {
      * @param account 
      * @param businessId 
      */
-    parse(invoice: any, businessId: string) {
+    parse(invoice: any, businessId: string, label:any) {
         let invoiceDate : any;
         let promiseDate : any;
         var lines: any = [];
@@ -59,19 +61,20 @@ export class InvoiceParser {
             lines.push(line);
         }
         let parseData = {
+            //'businessId': businessId,
             "number" : invoice.Number,
             "date" : invoiceDate !== null || invoiceDate !== '' ? invoiceDate : '1994-10-10', 
             "dueDate" : promiseDate !== undefined ? promiseDate : '2020-09-09',
             "shipDate" :  '1912-12-12', //hardcoded
             "trackingNo" :  ' ', //hardcoded
-           // "contactID" :  invoice.Customer !== null ? invoice.Customer.UID+'' : '', 
+            //"contactID" : '1', //label == 'invoice'? invoice.Customer !== null ? invoice.Customer.UID+'' : '' :invoice.Supplier!== null ?  invoice.Supplier.UID : '1', //hardcoded
             "totalLineItem" :  1, //hardcoded
             "lineAmountType" : 1, //hardcoded
             "amount" :  invoice.TotalAmount,
             "balance" :  invoice.BalanceDueAmount,
             "totalTax" : invoice.TotalTax,
             "platformId" :  invoice.UID !== null ? invoice.UID :'123',
-            "type" :  '1', ///NEED TO CHECK once again
+            "type" : label == 'invoice'? '1' :'4', ///NEED TO CHECK once again
             "lines" :  lines,
             "currency" : 'INR'
         }

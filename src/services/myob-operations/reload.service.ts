@@ -9,14 +9,14 @@ import { EntityType } from '@shared/enums/entity-type-enum';
 import { OperationType } from '@shared/enums/operation-type-enum';
 import { ChartOfAccountParser } from 'src/parsers/account';
 import { QueueDataHandler } from '@shared/queue-data-service';
-import { CustomerParser } from 'src/parsers/customer';
+import { ContactParser } from 'src/parsers/contact';
 import { PersonalParser } from 'src/parsers/personal';
 import { CompanyParser } from 'src/parsers/company';
 import { VendorParser } from 'src/parsers/vendor';
 import { ItemParser } from 'src/parsers/item';
 import { InvoiceParser } from 'src/parsers/invoice';
 import { HTTPService } from '@shared/http-service';
-import { CustomerPaymentParser } from 'src/parsers/customer-payment';
+import { PaymentParser } from 'src/parsers/payment';
 import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
 import { BillParser } from 'src/parsers/bill';
 import { EmployeeParser } from 'src/parsers/employee';
@@ -80,15 +80,10 @@ export class MonthlReloadService {
     async reloadData(syncDate: string, tokenResponse: any, realmId: string, businessId: string, reloadType?: ReloadType, monthlyReloadDate?: string) {
 
         // Fetch all entites & thier reports required for reloading a company
-        await this.fetchCustomers(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchSuppliers(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchEmployees(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchPersonals(syncDate, tokenResponse, realmId, businessId);
+        await this.fetchContacts(syncDate, tokenResponse, realmId, businessId);
         await this.fetchAccounts(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchCustomerPayments(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchSupplierPayments(syncDate, tokenResponse, realmId, businessId);
+        await this.fetchPayments(syncDate, tokenResponse, realmId, businessId);
         await this.fetchInvoices(syncDate, tokenResponse, realmId, businessId);
-        await this.fetchBills(syncDate, tokenResponse, realmId, businessId);
         await this.fetchItems(syncDate, tokenResponse, realmId, businessId);
         await this.fetchJournalTransaction(syncDate, tokenResponse, realmId, businessId);
     }
@@ -96,9 +91,10 @@ export class MonthlReloadService {
     /**
      * Fetch Customer from MYOB CDC API 
      */
-    async fetchCustomers(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchContacts(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
+            let contactsData:any = [];
             let customers:any;
             // Call myob api to fetch customers
             customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -112,23 +108,10 @@ export class MonthlReloadService {
                 customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (customers.Items.length != 0) {
-                let parsedCustomers = new CustomerParser().parseCustomer(customers, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedCustomers);
-                logger.info("customers Reloaded: businessId: " + businessId)
+                contactsData.push({value: customers , label: 'customer'})
+               // logger.info("customers Fetched--->" + customers.Items.length)
             }
 
-        } catch (error) {
-            logger.error(error)
-        }
-    }
-
-    
-    /**
-       * Fetch Suppliers from MYOB CDC API 
-     */
-    async fetchSuppliers(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
             let vendors:any;
             // Call myob api to fetch vendors
             vendors = await myobDataReaderService.getAllSuppliers(tokenResponse.data.accessToken, realmId, updated_or_created_since);
@@ -142,22 +125,10 @@ export class MonthlReloadService {
                 vendors = await myobDataReaderService.getAllSuppliers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (vendors.Items.length != 0) {
-                let parsedvendors = new VendorParser().parseVendor(vendors, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedvendors);
-                logger.info("vendors Reloaded: businessId: " + businessId)
+                contactsData.push({value: vendors , label: 'vendors'})
+               // logger.info("vendors Fetched--->" + vendors.Items.length)
             }
-        } catch (error) {
-            logger.error(error)
-        }
-    }
 
-       
-    /**
-      * Fetch Employees from MYOB CDC API 
-     */
-    async fetchEmployees(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
             let employees:any;
             // Call myob api to fetch vendors
             employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -171,22 +142,10 @@ export class MonthlReloadService {
                 employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (employees.Items.length != 0) {
-                let parsedemployee = new EmployeeParser().parseEmployee(employees, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedemployee);
-                logger.info("employees Reloaded: businessId: " + businessId)
+                contactsData.push({value: employees , label: 'employees'})
+                //logger.info("employees Fetched--->" + employees.Items.length)
             }
-        } catch (error) {
-            logger.error(error)
-        }
-    }
 
-        
-    /**
-        * Fetch Contacts from MYOB CDC API 
-     */
-    async fetchPersonals(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
             let personals:any;
             // Call myob api to fetch personals
             personals = await myobDataReaderService.getAllPersonals(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -200,14 +159,20 @@ export class MonthlReloadService {
                 personals = await myobDataReaderService.getAllPersonals(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (personals.Items.length != 0) {
-                let parsedPersonal = new PersonalParser().parsePersonal(personals, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedPersonal);
-                logger.info("personals Reloaded: businessId: " + businessId)
+                contactsData.push({value: personals , label: 'personals'})
+               // logger.info("personals Fetched--->" + personals.Items.length)
             }
+            let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
+            //logger.info("contact parsed" + JSON.stringify(parsedContacts))
+            QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedContacts);
+            //logger.info("contact Fetched: businessId: " + businessId)
+
         } catch (error) {
             logger.error(error)
         }
     }
+
+
 
       /**
       * Fetch Accounts from MYOB CDC API 
@@ -240,9 +205,10 @@ export class MonthlReloadService {
         /**
      * Fetch CustomerPayments from MYOB CDC API 
      */
-    async fetchCustomerPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
+    async fetchPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
+            let paymentsData:any = [];
             let customerPayments:any;
             // Call myob api to fetch items
             customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
@@ -256,21 +222,9 @@ export class MonthlReloadService {
                 customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (customerPayments.Items.length != 0) {
-                let parsedCustomerPayments = new CustomerPaymentParser().parseCustomerPayment(customerPayments, businessId)
-                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedCustomerPayments);
-                logger.info("customer payment Reloaded: businessId: " + businessId)
+                paymentsData.push({value: customerPayments , label: 'customerPayments'})
             }
-        } catch (error) {
-            logger.error(error)
-        }
-    }
 
-        /**
-     * Fetch SupplierPayments from MYOB CDC API 
-     */
-    async fetchSupplierPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
             let supplierPayments:any;
             // Call myob api to fetch items
             supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
@@ -284,15 +238,18 @@ export class MonthlReloadService {
                 supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (supplierPayments.Items.length != 0) {
-                let parsedSupplierPayments = new SupplierPaymentParser().parseSupplierPayment(supplierPayments, businessId)
-                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedSupplierPayments);
-                logger.info("supplier payment Reloaded: businessId: " + businessId)
+                paymentsData.push({value: supplierPayments , label: 'supplierPayments'})
             }
+
+            let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
+            //logger.info("payments parsed" + JSON.stringify(parsedPayments))
+            QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedPayments);
+            //logger.info("customer payment Fetched: businessId: " + businessId)
+            
         } catch (error) {
             logger.error(error)
         }
     }
-
 
     /**
      * Fetch Invoices from MYOB CDC API 
@@ -300,6 +257,7 @@ export class MonthlReloadService {
     async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
+            let invoiceData: any = [];
             let invoices:any;
             // Call myob api to fetch items
             invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -314,23 +272,9 @@ export class MonthlReloadService {
                 invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (invoices.Items.length != 0) {
-                let parsedInvoice = new InvoiceParser().parseInvoice(invoices, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoice);
-                logger.info("invoices Reloaded: businessId: " + businessId)
+                invoiceData.push({value: invoices , label: 'invoice'})
             }
-           
-        } catch (error) {
-            logger.error(error)
-        }
-    }
 
-
-        /**
-     * Fetch Bills from MYOB CDC API 
-     */
-    async fetchBills(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
             let bills:any;
             // Call myob api to fetch items
             bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);
@@ -344,10 +288,15 @@ export class MonthlReloadService {
                 bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (bills.Items.length != 0) {
-                let parsedBill = new BillParser().parseBill(bills, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedBill);
-                logger.info("bills Reloaded: businessId: " + businessId)
+                invoiceData.push({value: bills , label: 'bill'})
             }
+
+            let parsedInvoice = new InvoiceParser().parseInvoice(invoiceData, businessId);
+            //logger.info("invoice parsed" + JSON.stringify(parsedInvoice))
+            QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoice);
+            //logger.info("invoices Fetched: businessId: " + businessId)
+            
+           
         } catch (error) {
             logger.error(error)
         }
@@ -375,7 +324,6 @@ export class MonthlReloadService {
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
                 QueueDataHandler.prepareAndSendQueueData(EntityType.item, OperationType.REPLACE, businessId, parsedItem);
-                logger.info("items Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -404,7 +352,6 @@ export class MonthlReloadService {
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 QueueDataHandler.prepareAndSendQueueData(EntityType.transactions, OperationType.REPLACE, businessId, parsedJournalTransactions);
-                logger.info("journal transaction Fetched: businessId: " + businessId)
             }
 
         } catch (error) {
