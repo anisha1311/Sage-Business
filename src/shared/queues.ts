@@ -16,7 +16,7 @@ export class QueueHandler {
         // Get chhanel connection if not exist
         let ch = await QueueSenderConnector.getQueueConnection();
         ch.sendToQueue(queueName, Buffer.from(JSON.stringify(message)),{persistent: true});
-        console.info(" [x] Sent %s", queueName + " BusinessId:- " + message.metadata.businessId);
+      //  console.info(" [x] Sent %s", queueName + " BusinessId:- " + message.metadata.businessId);
 
     }
 

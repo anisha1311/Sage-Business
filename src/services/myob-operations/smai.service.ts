@@ -1,15 +1,11 @@
 import { HTTPService } from '@shared/http-service';
 import { ContactParser } from 'src/parsers/contact';
-import { PersonalParser } from 'src/parsers/personal';
 import { CompanyParser } from 'src/parsers/company';
-import { VendorParser } from 'src/parsers/vendor';
 import { ItemParser } from 'src/parsers/item';
-import { InvoiceParser } from 'src/parsers/invoice';
+import { InvoiceBillParser } from 'src/parsers/invoice';
 import { PaymentParser } from 'src/parsers/payment';
 import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
 import { JournalTransactionParser } from 'src/parsers/journal-transaction';
-import { BillParser } from 'src/parsers/bill';
-import { EmployeeParser } from 'src/parsers/employee';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import { AccessTokenParser } from 'src/parsers/access-tokens';
@@ -93,7 +89,7 @@ export class SmaiBusinessService {
                                 
                                 //******** GET ALL CHART OF ACCOUNT */    
                                // console.log('Customer OnBoarding Start');
-                                await this.getSaveContacts(this.accessTokens, businessId, realmId, onBoardDate);
+                                await this.getContacts(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL accounts Data */
                                    //console.log('accounts OnBoarding Start');
@@ -140,7 +136,7 @@ export class SmaiBusinessService {
      /**
      * will fetch and save company data over successfully load company
      */
-    async getSaveContacts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
+    async getContacts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
        await this.saveContacts(accessTokens, businessId, realmId, updated_or_created_since)
     }
     
@@ -164,7 +160,6 @@ export class SmaiBusinessService {
             } 
             if (customers.Items.length != 0) {
                 contactsData.push({value: customers , label: 'customer'})
-                //logger.info("customers Fetched--->" + customers.Items.length)
             }  
             
             let vendors:any;
@@ -181,7 +176,6 @@ export class SmaiBusinessService {
             } 
             if (vendors.Items.length != 0) {
                 contactsData.push({value: vendors , label: 'vendors'})
-               // logger.info("vendors Fetched--->" + vendors.Items.length)
             }
 
             let employees:any;
@@ -198,7 +192,6 @@ export class SmaiBusinessService {
             } 
             if (employees.Items.length != 0) {
                 contactsData.push({value: employees , label: 'employees'})
-                //logger.info("employees Fetched--->" + employees.Items.length)
             }
 
             let personals:any;
@@ -215,15 +208,13 @@ export class SmaiBusinessService {
             } 
             if (personals.Items.length != 0) {
                 contactsData.push({value: personals , label: 'personals'})
-               // logger.info("personals Fetched--->" + personals.Items.length)
             }
             let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
-            //logger.info("contact parsed" + JSON.stringify(parsedContacts))
             this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedContacts);
-            //logger.info("contact Fetched: businessId: " + businessId)
+            logger.info("contact Fetched: businessId: " + businessId)
            
         } catch (error) {       
-            logger.error("customers Failed:-" + error);
+            logger.error("Contacts Failed:-" + error);
         }
     }
 
@@ -259,7 +250,7 @@ export class SmaiBusinessService {
             if (accounts.Items.length != 0) {
                 let parsedAccount = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
                 this.prepareAndSendQueueData(EntityType.account, OperationType.CREATE, businessId, parsedAccount);
-                //logger.info("accounts Fetched: businessId: " + businessId)
+                logger.info("accounts Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -299,7 +290,7 @@ export class SmaiBusinessService {
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
                 this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItem);
-                //logger.info("items Fetched: businessId: " + businessId)
+                logger.info("items Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       
@@ -320,7 +311,7 @@ export class SmaiBusinessService {
      */
     async saveInvoices(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
-            let invoiceData: any = [];
+            let invoiceBillData: any = [];
             let invoices:any;
             // Call myob api to fetch items
             invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since); 
@@ -335,7 +326,7 @@ export class SmaiBusinessService {
                 invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (invoices.Items.length != 0) {
-                invoiceData.push({value: invoices , label: 'invoice'})
+                invoiceBillData.push({value: invoices , label: 'invoice'})
             }
 
             let bills:any;
@@ -351,13 +342,12 @@ export class SmaiBusinessService {
                 bills = await myobDataReaderService.getAllBills(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (bills.Items.length != 0) {
-                invoiceData.push({value: bills , label: 'bill'})
+                invoiceBillData.push({value: bills , label: 'bill'})
             }
 
-            let parsedInvoice = new InvoiceParser().parseInvoice(invoiceData, businessId);
-            //logger.info("invoice parsed" + JSON.stringify(parsedInvoice))
-            this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoice);
-            //logger.info("invoices Fetched: businessId: " + businessId)
+            let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
+            this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoiceBill);
+            logger.info("invoices Fetched: businessId: " + businessId)
            
         } catch (error) {       
             logger.error("invoices Failed:-" + error);
@@ -413,9 +403,8 @@ export class SmaiBusinessService {
             }
 
             let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
-            //logger.info("payments parsed" + JSON.stringify(parsedPayments))
             this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedPayments);
-            //logger.info("customer payment Fetched: businessId: " + businessId)
+            logger.info("customer payment Fetched: businessId: " + businessId)
            
         } catch (error) {       
             logger.error("customer payment Failed:-" + error);
@@ -453,7 +442,7 @@ export class SmaiBusinessService {
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);
-                //logger.info("journal transaction Fetched: businessId: " + businessId)
+                logger.info("journal transaction Fetched: businessId: " + businessId)
             }
            
         } catch (error) {       

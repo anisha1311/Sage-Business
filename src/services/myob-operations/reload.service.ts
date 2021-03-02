@@ -10,16 +10,12 @@ import { OperationType } from '@shared/enums/operation-type-enum';
 import { ChartOfAccountParser } from 'src/parsers/account';
 import { QueueDataHandler } from '@shared/queue-data-service';
 import { ContactParser } from 'src/parsers/contact';
-import { PersonalParser } from 'src/parsers/personal';
 import { CompanyParser } from 'src/parsers/company';
-import { VendorParser } from 'src/parsers/vendor';
 import { ItemParser } from 'src/parsers/item';
-import { InvoiceParser } from 'src/parsers/invoice';
+import { InvoiceBillParser } from 'src/parsers/invoice';
 import { HTTPService } from '@shared/http-service';
 import { PaymentParser } from 'src/parsers/payment';
 import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
-import { BillParser } from 'src/parsers/bill';
-import { EmployeeParser } from 'src/parsers/employee';
 import { stringFormat } from '@shared/functions';
 import { Constant } from '@shared/constants';
 import {  ReloadType } from '@shared/enums/comman-enum';
@@ -109,7 +105,6 @@ export class MonthlReloadService {
             } 
             if (customers.Items.length != 0) {
                 contactsData.push({value: customers , label: 'customer'})
-               // logger.info("customers Fetched--->" + customers.Items.length)
             }
 
             let vendors:any;
@@ -126,7 +121,6 @@ export class MonthlReloadService {
             } 
             if (vendors.Items.length != 0) {
                 contactsData.push({value: vendors , label: 'vendors'})
-               // logger.info("vendors Fetched--->" + vendors.Items.length)
             }
 
             let employees:any;
@@ -143,7 +137,6 @@ export class MonthlReloadService {
             } 
             if (employees.Items.length != 0) {
                 contactsData.push({value: employees , label: 'employees'})
-                //logger.info("employees Fetched--->" + employees.Items.length)
             }
 
             let personals:any;
@@ -160,12 +153,11 @@ export class MonthlReloadService {
             } 
             if (personals.Items.length != 0) {
                 contactsData.push({value: personals , label: 'personals'})
-               // logger.info("personals Fetched--->" + personals.Items.length)
             }
             let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
             //logger.info("contact parsed" + JSON.stringify(parsedContacts))
             QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedContacts);
-            //logger.info("contact Fetched: businessId: " + businessId)
+            logger.info("contact Reloaded: businessId: " + businessId)
 
         } catch (error) {
             logger.error(error)
@@ -244,7 +236,7 @@ export class MonthlReloadService {
             let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
             //logger.info("payments parsed" + JSON.stringify(parsedPayments))
             QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedPayments);
-            //logger.info("customer payment Fetched: businessId: " + businessId)
+            logger.info("Payment Reloaded: businessId: " + businessId)
             
         } catch (error) {
             logger.error(error)
@@ -257,7 +249,7 @@ export class MonthlReloadService {
     async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
-            let invoiceData: any = [];
+            let invoiceBillData: any = [];
             let invoices:any;
             // Call myob api to fetch items
             invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -272,7 +264,7 @@ export class MonthlReloadService {
                 invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (invoices.Items.length != 0) {
-                invoiceData.push({value: invoices , label: 'invoice'})
+                invoiceBillData.push({value: invoices , label: 'invoice'})
             }
 
             let bills:any;
@@ -288,13 +280,13 @@ export class MonthlReloadService {
                 bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (bills.Items.length != 0) {
-                invoiceData.push({value: bills , label: 'bill'})
+                invoiceBillData.push({value: bills , label: 'bill'})
             }
 
-            let parsedInvoice = new InvoiceParser().parseInvoice(invoiceData, businessId);
+            let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
             //logger.info("invoice parsed" + JSON.stringify(parsedInvoice))
-            QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoice);
-            //logger.info("invoices Fetched: businessId: " + businessId)
+            QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoiceBill);
+            logger.info("invoices-bills Reloaded: businessId: " + businessId)
             
            
         } catch (error) {
@@ -324,6 +316,7 @@ export class MonthlReloadService {
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
                 QueueDataHandler.prepareAndSendQueueData(EntityType.item, OperationType.REPLACE, businessId, parsedItem);
+                logger.info("items Reloaded: businessId: " + businessId)
             }
         } catch (error) {
             logger.error(error)
@@ -352,6 +345,7 @@ export class MonthlReloadService {
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 QueueDataHandler.prepareAndSendQueueData(EntityType.transactions, OperationType.REPLACE, businessId, parsedJournalTransactions);
+                logger.info("journal transaction Reloaded: businessId: " + businessId)
             }
 
         } catch (error) {

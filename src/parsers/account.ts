@@ -43,107 +43,40 @@ export class ChartOfAccountParser {
             'businessId': businessId,
             'platformAccountId': account.UID,
             'name': account.Name,
-            'accountSubType':  1, //  account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): ''
-            'classification':  'Liability', //account.Classification 
+            'accountSubType': 1, 
+            'classification': 'Income', //account.Classification,
             'active': account.IsActive,           
-            'parentAccountId': account.ParentAccount!== null? this.getParentId(account.ParentAccount.Name): 1 ,
-            'parentAccountName':  'Bank', // account.ParentAccount!== null?  account.ParentAccount.Name ://hardcoded
-             //'accountNumber': account.BankingDetails !== null? account.BankingDetails.BankAccountNumber: 12324324,
+            'parentAccountId': 1, //this.getParentId(account.ParentAccount.Type), 
+            'parentAccountName': 'Bank', // account.ParentAccount!== null ? account.ParentAccount.Name : 
+            'accountNumber': account.BankingDetails !== null? (account.BankingDetails.BankAccountNumber !== null ? (account.BankingDetails.BankAccountNumber).toString() : ' ') : ' ',
         }        
     
         return parseData;
     }
 
-    /**
-     * Will Check for Account Types and Return Category type if "Income/Expense" else return accounttype Value as accountSubType
-     * @param accountType 
-     * @param accountSubType 
-     */
-    getAccountType(accountType: string) {
-        if (accountType === ChartOfAccountKeys.income || accountType === ChartOfAccountKeys.expense) {
-            return this.findSubAccountType(accountType === ChartOfAccountKeys.income, accountType)
-        }
-        else {
-            return this.getParentOrCategoryAccountId(accountType);
-        }
-    }
-
     getParentId(parentAccountName:string){
         let idMap:any = {
             'Bank':1,
-            'Account Receivable':2,
-            'Other Current Asset' :3,
-            'Other Asset' :4,
-            'Fixed Asset':5,
-            'Credit Card':6,
-            'Accounts Payable':7,
-            'Other Current Liability':8,
-            'Long Term Liability':9,
+            'AccountReceivable':2,
+            'CurrentAsset' :3,
+            'OtherCurrentAsset' :3,
+            'OtherAsset' :4,
+            'FixedAsset':5,
+            'CreditCard':6,
+            'AccountsPayable':7,
+            'OtherCurrentLiability':8,
+            'LongTermLiability':9,
             'Equity':10,
-            'Cost Of Goods Sold':11,
+            'CostOfGoodsSold':11,
             'Expense':12,
-            'Other Expense':13,
+            'OtherExpense':13,
             'Income':14,
-            'Other Income':15
+            'OtherIncome':15
         }
-        return idMap[parentAccountName] || 1;
+        return idMap[parentAccountName];
     }
 
-    /**
-     * will seach Category name of Income Type or Expense Type and will return if category found , 
-       else return "Other Income" or "Other Expense" based on isIncome or IsExpense
-     * @param isIncome 
-     * @param item 
-     */
-    findSubAccountType(isIncome: boolean, item: any) {
-        let searchIn = isIncome ? data.Income : data.Expense;
-        let length = Object.keys(searchIn).length;
-        let isFound = false;
-        for (let i = 0; i < length; i++) {
-            let array = Object.values(searchIn)[i];
-            let key = Object.keys(searchIn)[i]
-            if (array) {
-                let containValue = array.includes(item);
 
-                if (containValue) {
-                    let id = this.getParentOrCategoryAccountId(key);
-                    return id
-                }
-                else {
-                    isFound = false;
-                }
-            }
-        }
-
-        if (!isFound) {
-            if (isIncome) {
-                let id = this.getParentOrCategoryAccountId(ChartOfAccountKeys.otherIncome);
-                return id;
-
-            }
-            else {
-                let id = this.getParentOrCategoryAccountId(ChartOfAccountKeys.otherExpense);
-                return id
-            }
-
-        }
-    }
-
-    /**
-     * will return parent account id 
-     * @param key 
-     */
-    getParentOrCategoryAccountId(key: string): number {
-        if (key) {
-            let subacc = _.find(this.subAccountTypesValues, { name: key.toLocaleLowerCase() });
-            if (subacc) return Number(subacc.value)
-            else throw new Error(Constant.busResMsg.accountTypeNotFound)
-        } else {
-            logger.info('getParentOrCategoryAccountId: key is undefined')
-             throw new Error(Constant.busResMsg.accountTypeNotFound)
-        }
-
-    }
 }
 
 

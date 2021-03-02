@@ -5,29 +5,29 @@ import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 var dateFormat = require('dateformat');
-export class InvoiceParser {
+export class InvoiceBillParser {
     /**
-     * will parse the Customers
-     * @param customerInfo 
+     * will parse the invoices
+     * @param invoiceInfo 
      * @param businessId 
      */
-     public parseInvoice(invoiceInfo: any, businessId: string) {
+     public parseInvoiceBills(invoiceBillInfo: any, businessId: string) {
         try {
-            let parsedInvoices: any = [];
-            let length = invoiceInfo.length || 0;
-            if (invoiceInfo && length > 0) {
+            let parsedInvoicesBills: any = [];
+            let length = invoiceBillInfo.length || 0;
+            if (invoiceBillInfo && length > 0) {
                 //let parsedInvoices: any = [];
                 for (let i = 0; i < length; i++) {
-                    for(let invoiceIndex = 0;invoiceIndex < invoiceInfo[i].value.Items.length; invoiceIndex++){
-                        const customer = invoiceInfo[i].value.Items[invoiceIndex];
-                        parsedInvoices.push(this.parse(customer, businessId, invoiceInfo[i].label))
+                    for(let invoiceIndex = 0;invoiceIndex < invoiceBillInfo[i].value.Items.length; invoiceIndex++){
+                        const invoiceBill = invoiceBillInfo[i].value.Items[invoiceIndex];
+                        parsedInvoicesBills.push(this.parse(invoiceBill, businessId, invoiceBillInfo[i].label))
                     }
                 }                
-                return parsedInvoices;
+                return parsedInvoicesBills;
             }
             else {
-                 return parsedInvoices;
-                //logger.info("No Customers")
+                 return parsedInvoicesBills;
+                //logger.info("No invoices")
             }
         } catch (error) {
             logger.error(error.stack || error.message)
@@ -35,48 +35,51 @@ export class InvoiceParser {
         }
     }
     /**
-     * Parse the Customer
+     * Parse the invoiceBill
      * @param account 
      * @param businessId 
      */
-    parse(invoice: any, businessId: string, label:any) {
-        let invoiceDate : any;
+    parse(invoiceBill: any, businessId: string, label:any) {
+        let invoiceBillDate : any;
         let promiseDate : any;
         var lines: any = [];
-        if(invoice.Date !== null){
-            invoiceDate = dateFormat(invoice.Date, "yyyy-mm-dd");
+        if(invoiceBill.Date !== null){
+            invoiceBillDate = dateFormat(invoiceBill.Date, "yyyy-mm-dd");
         }
-        if(invoice.PromisedDate !==null){
-            promiseDate = dateFormat(invoice.Date, "yyyy-mm-dd");
+        if(invoiceBill.PromisedDate !==null && promiseDate !== undefined){
+            promiseDate = dateFormat(invoiceBill.PromisedDate, "yyyy-mm-dd");
         }
-        for (var i = 0; i<invoice.Lines.length; i++)
-        {
-            var line: any = {};
-            line['description'] =  'description', //invoice.Lines[i].Description         
-            line['itemId'] = invoice.Lines[i].Item !== null ? invoice.Lines[i].Item.UID : '23676236726';               
-            line['lineNumber'] = '23' //invoice.Lines[i].Item !== null ? invoice.Lines[i].Item.Number : '23';  
-            line['lineAmount'] = invoice.Lines[i].CostOfGoodsSold;     
-            line['quantity'] = invoice.Lines[i].ShipQuantity;  
-            line['accountCode'] = '1';
-            lines.push(line);
+        if(invoiceBill.Lines !== null) { 
+            for (var i = 0; i<invoiceBill.Lines.length; i++)
+            {
+                var line: any = {};
+                line['description'] = invoiceBill.Lines[i].Description !== null ? invoiceBill.Lines[i].Description : '1',
+                line['itemId'] = invoiceBill.Lines[i].Item !== null ? invoiceBill.Lines[i].Item.UID : ' ';               
+                line['lineNumber'] = i+1+'';
+                line['lineAmount'] = invoiceBill.Lines[i].CostOfGoodsSold;     
+                line['quantity'] = invoiceBill.Lines[i].ShipQuantity;  
+                line['quantity'] = invoiceBill.Lines[i].ShipQuantity;  
+                line['accountCode'] = label==invoiceBill ? invoiceBill.Lines[i].Item.Number : ' '; 
+                line['unitPrice'] = invoiceBill.Lines[i].UnitPrice;
+                lines.push(line);
+            }    
         }
+           
         let parseData = {
             //'businessId': businessId,
-            "number" : invoice.Number,
-            "date" : invoiceDate !== null || invoiceDate !== '' ? invoiceDate : '1994-10-10', 
-            "dueDate" : promiseDate !== undefined ? promiseDate : '2020-09-09',
-            "shipDate" :  '1912-12-12', //hardcoded
-            "trackingNo" :  ' ', //hardcoded
-            //"contactID" : '1', //label == 'invoice'? invoice.Customer !== null ? invoice.Customer.UID+'' : '' :invoice.Supplier!== null ?  invoice.Supplier.UID : '1', //hardcoded
-            "totalLineItem" :  1, //hardcoded
-            "lineAmountType" : 1, //hardcoded
-            "amount" :  invoice.TotalAmount,
-            "balance" :  invoice.BalanceDueAmount,
-            "totalTax" : invoice.TotalTax,
-            "platformId" :  invoice.UID !== null ? invoice.UID :'123',
-            "type" : label == 'invoice'? '1' :'4', ///NEED TO CHECK once again
+            "number" : invoiceBill.Number,
+            "date" : invoiceBillDate !== null || invoiceBillDate !== '' ? invoiceBillDate : '1994-10-10', 
+            "dueDate" : promiseDate || '2020-09-09',
+            "trackingNo" :  ' ', 
+            "totalLineItem" :  invoiceBill.Lines.length, 
+            "lineAmountType" : 1, 
+            "amount" :  invoiceBill.TotalAmount,
+            "balance" :  invoiceBill.BalanceDueAmount,
+            "totalTax" : invoiceBill.TotalTax,
+            "platformId" :  invoiceBill.UID !== null ? invoiceBill.UID : ' ',
+            "type" : label == 'invoiceBill'? '1' :'4',
             "lines" :  lines,
-            "currency" : 'INR'
+            "currency" : invoiceBill.ForeignCurrency || ' '
         }
         return parseData;
     }
