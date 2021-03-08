@@ -84,6 +84,7 @@ export class SmaiBusinessService {
                                 console.log('New company')
                                 let businessId = response.data.data.id; 
                                 let realmId = response.data.data.businessPlateformId;
+                                console.log('For Company ', realmId);
                                 let currentDate = new Date();
                                 let onBoardDate = getThreeYearAgoDate().toString();
                                 
@@ -146,6 +147,7 @@ export class SmaiBusinessService {
      async saveContacts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
             let contactsData:any = [];
+            let totalLength = 0;
             let customers:any;
             // Call myob api to fetch customers
             customers = await myobDataReaderService.getAllCustomers(accessTokens.access_token, realmId, updated_or_created_since); 
@@ -159,6 +161,7 @@ export class SmaiBusinessService {
                 customers = await myobDataReaderService.getAllCustomers(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (customers.Items.length != 0) {
+                totalLength += customers.Items.length;
                 contactsData.push({value: customers , label: 'customer'})
             }  
             
@@ -175,6 +178,7 @@ export class SmaiBusinessService {
                 vendors = await myobDataReaderService.getAllSuppliers(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (vendors.Items.length != 0) {
+                totalLength += vendors.Items.length;
                 contactsData.push({value: vendors , label: 'vendors'})
             }
 
@@ -191,6 +195,7 @@ export class SmaiBusinessService {
                 employees = await myobDataReaderService.getAllEmployees(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (employees.Items.length != 0) {
+                totalLength += employees.Items.length;
                 contactsData.push({value: employees , label: 'employees'})
             }
 
@@ -207,11 +212,14 @@ export class SmaiBusinessService {
                 personals = await myobDataReaderService.getAllPersonals(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (personals.Items.length != 0) {
+                totalLength += personals.Items.length;
                 contactsData.push({value: personals , label: 'personals'})
             }
-            let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
-            this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedContacts);
-            logger.info("contact Fetched: businessId: " + businessId)
+            if(totalLength != 0 ){
+                let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
+                this.prepareAndSendQueueData(EntityType.contact, OperationType.CREATE, businessId, parsedContacts);
+            }         
+            logger.info("contact Fetched: (" + totalLength + ")" + " businessId: "  + businessId)
            
         } catch (error) {       
             logger.error("Contacts Failed:-" + error);
@@ -250,8 +258,8 @@ export class SmaiBusinessService {
             if (accounts.Items.length != 0) {
                 let parsedAccount = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
                 this.prepareAndSendQueueData(EntityType.account, OperationType.CREATE, businessId, parsedAccount);
-                logger.info("accounts Fetched: businessId: " + businessId)
-            }
+            }            
+            logger.info("accounts Fetched: (" + accounts.Items.length + ")" + " businessId: "  + businessId)
            
         } catch (error) {       
             logger.error("accounts Failed:-" + error);
@@ -289,9 +297,9 @@ export class SmaiBusinessService {
             } 
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
-                this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItem);
-                logger.info("items Fetched: businessId: " + businessId)
+                this.prepareAndSendQueueData(EntityType.item, OperationType.CREATE, businessId, parsedItem);               
             }
+            logger.info("items Fetched: (" + items.Items.length + ")" + " businessId: "  + businessId)
            
         } catch (error) {       
             logger.error("items Failed:-" + error);
@@ -312,6 +320,7 @@ export class SmaiBusinessService {
     async saveInvoices(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
             let invoiceBillData: any = [];
+            let totalLength = 0;
             let invoices:any;
             // Call myob api to fetch items
             invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since); 
@@ -326,6 +335,7 @@ export class SmaiBusinessService {
                 invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (invoices.Items.length != 0) {
+                totalLength += invoices.Items.length;
                 invoiceBillData.push({value: invoices , label: 'invoice'})
             }
 
@@ -342,15 +352,17 @@ export class SmaiBusinessService {
                 bills = await myobDataReaderService.getAllBills(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (bills.Items.length != 0) {
+                totalLength += bills.Items.length;
                 invoiceBillData.push({value: bills , label: 'bill'})
             }
-
-            let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
-            this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoiceBill);
-            logger.info("invoices Fetched: businessId: " + businessId)
+            if(totalLength  != 0 ) {
+                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
+                this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoiceBill);
+            }           
+            logger.info("invoices-bills Fetched: (" + totalLength + ")" + " businessId: "  + businessId)
            
         } catch (error) {       
-            logger.error("invoices Failed:-" + error);
+            logger.error("invoices-bills Failed:-" + error);
         }
     }
 
@@ -370,6 +382,7 @@ export class SmaiBusinessService {
     async savePayments(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
             let paymentsData:any = [];
+            let totalLength = 0;
             let customerPayments:any;
             // Call myob api to fetch items
             customerPayments = await myobDataReaderService.getAllCustomerPayments(accessTokens.access_token, realmId, updated_or_created_since);
@@ -383,6 +396,7 @@ export class SmaiBusinessService {
                 customerPayments = await myobDataReaderService.getAllCustomerPayments(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (customerPayments.Items.length != 0) {
+                totalLength += customerPayments.Items.length;
                 paymentsData.push({value: customerPayments , label: 'customerPayments'})
             }
 
@@ -399,15 +413,17 @@ export class SmaiBusinessService {
                 supplierPayments = await myobDataReaderService.getAllSupplierPayments(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (supplierPayments.Items.length != 0) {
+                totalLength += supplierPayments.Items.length;
                 paymentsData.push({value: supplierPayments , label: 'supplierPayments'})
             }
-
-            let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
-            this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedPayments);
-            logger.info("customer payment Fetched: businessId: " + businessId)
+            if( totalLength != 0) { 
+                let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
+                this.prepareAndSendQueueData(EntityType.payments, OperationType.CREATE, businessId, parsedPayments);
+            }         
+            logger.info("payment Fetched: (" + totalLength + ")" + " businessId: "  + businessId)
            
         } catch (error) {       
-            logger.error("customer payment Failed:-" + error);
+            logger.error("payment Failed:-" + error);
         }    
     }
    
@@ -441,10 +457,9 @@ export class SmaiBusinessService {
             } 
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
-                this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);
-                logger.info("journal transaction Fetched: businessId: " + businessId)
+                this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);               
             }
-           
+            logger.info("journal transaction Fetched: (" + jouralTransaction.Items.length + ")" + " businessId: "  + businessId)
         } catch (error) {       
             logger.error("journal transaction Failed:-" + error);
         } 

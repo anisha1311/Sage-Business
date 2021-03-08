@@ -91,6 +91,7 @@ export class MonthlReloadService {
 
         try {
             let contactsData:any = [];
+            let totalLength = 0;
             let customers:any;
             // Call myob api to fetch customers
             customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
@@ -104,6 +105,7 @@ export class MonthlReloadService {
                 customers = await myobDataReaderService.getAllCustomers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (customers.Items.length != 0) {
+                totalLength += customers.Items.length;
                 contactsData.push({value: customers , label: 'customer'})
             }
 
@@ -120,6 +122,7 @@ export class MonthlReloadService {
                 vendors = await myobDataReaderService.getAllSuppliers(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (vendors.Items.length != 0) {
+                totalLength += vendors.Items.length;
                 contactsData.push({value: vendors , label: 'vendors'})
             }
 
@@ -136,6 +139,7 @@ export class MonthlReloadService {
                 employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (employees.Items.length != 0) {
+                totalLength += employees.Items.length;
                 contactsData.push({value: employees , label: 'employees'})
             }
 
@@ -152,12 +156,14 @@ export class MonthlReloadService {
                 personals = await myobDataReaderService.getAllPersonals(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (personals.Items.length != 0) {
+                totalLength += personals.Items.length;
                 contactsData.push({value: personals , label: 'personals'})
             }
-            let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
-            //logger.info("contact parsed" + JSON.stringify(parsedContacts))
-            QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedContacts);
-            logger.info("contact Reloaded: businessId: " + businessId)
+            if(totalLength != 0 ){
+                let parsedContacts = new ContactParser().parseContact(contactsData, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.contact, OperationType.REPLACE, businessId, parsedContacts);
+            }
+            logger.info("contact Reloaded: (" + totalLength + ")" + " businessId: "  + businessId)
 
         } catch (error) {
             logger.error(error)
@@ -187,114 +193,13 @@ export class MonthlReloadService {
             if (accounts.Items.length != 0) {
                 let parsedAccount = new ChartOfAccountParser().parseChartofAccounts(accounts, businessId);
                 QueueDataHandler.prepareAndSendQueueData(EntityType.account, OperationType.REPLACE, businessId, parsedAccount);
-                logger.info("accounts Reloaded: businessId: " + businessId)
             }
+            logger.info("accounts Reloaded: (" + accounts.Items.length + ")" + " businessId: "  + businessId)
         } catch (error) {
             logger.error(error)
         }
     }
-
-        /**
-     * Fetch CustomerPayments from MYOB CDC API 
-     */
-    async fetchPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
-            let paymentsData:any = [];
-            let customerPayments:any;
-            // Call myob api to fetch items
-            customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
-            if(customerPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
-                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
-                if (response.access_token) {
-                    apisvc.formatTokens(response, realmId);
-                    this.tokenResponse = response;
-                    tokenResponse = this.tokenResponse;
-                }
-                customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
-            } 
-            if (customerPayments.Items.length != 0) {
-                paymentsData.push({value: customerPayments , label: 'customerPayments'})
-            }
-
-            let supplierPayments:any;
-            // Call myob api to fetch items
-            supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
-            if(supplierPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
-                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
-                if (response.access_token) {
-                    apisvc.formatTokens(response, realmId);
-                    this.tokenResponse = response;
-                    tokenResponse = this.tokenResponse;
-                }
-                supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
-            } 
-            if (supplierPayments.Items.length != 0) {
-                paymentsData.push({value: supplierPayments , label: 'supplierPayments'})
-            }
-
-            let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
-            //logger.info("payments parsed" + JSON.stringify(parsedPayments))
-            QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedPayments);
-            logger.info("Payment Reloaded: businessId: " + businessId)
-            
-        } catch (error) {
-            logger.error(error)
-        }
-    }
-
-    /**
-     * Fetch Invoices from MYOB CDC API 
-     */
-    async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
-
-        try {
-            let invoiceBillData: any = [];
-            let invoices:any;
-            // Call myob api to fetch items
-            invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
- 
-            if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
-                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
-                if (response.access_token) {
-                    apisvc.formatTokens(response, realmId);
-                    this.tokenResponse = response;
-                    tokenResponse = this.tokenResponse;
-                }
-                invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
-            } 
-            if (invoices.Items.length != 0) {
-                invoiceBillData.push({value: invoices , label: 'invoice'})
-            }
-
-            let bills:any;
-            // Call myob api to fetch items
-            bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);
-            if(bills === Constant.commanResMsg.UnauthorizedStatusCode){                
-                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
-                if (response.access_token) {
-                    apisvc.formatTokens(response, realmId);
-                    this.tokenResponse = response;
-                    tokenResponse = this.tokenResponse;
-                }
-                bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
-            } 
-            if (bills.Items.length != 0) {
-                invoiceBillData.push({value: bills , label: 'bill'})
-            }
-
-            let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
-            //logger.info("invoice parsed" + JSON.stringify(parsedInvoice))
-            QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoiceBill);
-            logger.info("invoices-bills Reloaded: businessId: " + businessId)
-            
-           
-        } catch (error) {
-            logger.error(error)
-        }
-    }
-
-        /**
+   /**
      * Fetch Items from MYOB CDC API 
      */
     async fetchItems(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
@@ -316,13 +221,121 @@ export class MonthlReloadService {
             if (items.Items.length != 0) {
                 let parsedItem = new ItemParser().parseItem(items, businessId);
                 QueueDataHandler.prepareAndSendQueueData(EntityType.item, OperationType.REPLACE, businessId, parsedItem);
-                logger.info("items Reloaded: businessId: " + businessId)
             }
+            logger.info("items Reloaded: (" + items.Items.length + ")" + " businessId: "  + businessId)
+        } catch (error) {
+            logger.error(error)
+        }
+    }
+     /**
+     * Fetch Invoices from MYOB CDC API 
+     */
+      async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
+
+        try {
+            let invoiceBillData: any = [];
+            let totalLength = 0;
+            let invoices:any;
+            // Call myob api to fetch items
+            invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
+ 
+            if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (invoices.Items.length != 0) {
+                totalLength += invoices.Items.length;
+                invoiceBillData.push({value: invoices , label: 'invoice'})
+            }
+
+            let bills:any;
+            // Call myob api to fetch items
+            bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(bills === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (bills.Items.length != 0) {
+                totalLength += bills.Items.length;
+                invoiceBillData.push({value: bills , label: 'bill'})
+            }
+            if(totalLength  != 0 ) {
+                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoiceBill);
+            }
+            logger.info("invoices-bills Reloaded: (" + totalLength + ")" + " businessId: "  + businessId)
+            
+           
         } catch (error) {
             logger.error(error)
         }
     }
 
+        /**
+     * Fetch CustomerPayments from MYOB CDC API 
+     */
+    async fetchPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
+
+        try {
+            let paymentsData:any = [];
+            let totalLength = 0;
+            let customerPayments:any;
+            // Call myob api to fetch items
+            customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(customerPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (customerPayments.Items.length != 0) {
+                totalLength += customerPayments.Items.length;
+                paymentsData.push({value: customerPayments , label: 'customerPayments'})
+            }
+
+            let supplierPayments:any;
+            // Call myob api to fetch items
+            supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
+            if(supplierPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
+                let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
+                if (response.access_token) {
+                    apisvc.formatTokens(response, realmId);
+                    this.tokenResponse = response;
+                    tokenResponse = this.tokenResponse;
+                }
+                supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
+            } 
+            if (supplierPayments.Items.length != 0) {
+                totalLength += supplierPayments.Items.length;
+                paymentsData.push({value: supplierPayments , label: 'supplierPayments'})
+            }
+            if( totalLength != 0) { 
+                let parsedPayments = new PaymentParser().parsePayment(paymentsData, businessId)
+                QueueDataHandler.prepareAndSendQueueData(EntityType.payments, OperationType.REPLACE, businessId, parsedPayments);
+            }
+            logger.info("payment Reloaded: (" + totalLength + ")" + " businessId: "  + businessId)
+            
+        } catch (error) {
+            logger.error(error)
+        }
+    }
+
+   
+
+     
 
  /**
      * Fetch Customer from MYOB CDC API 
@@ -345,8 +358,8 @@ export class MonthlReloadService {
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 QueueDataHandler.prepareAndSendQueueData(EntityType.transactions, OperationType.REPLACE, businessId, parsedJournalTransactions);
-                logger.info("journal transaction Reloaded: businessId: " + businessId)
             }
+            logger.info("journal transaction Reloaded: (" + jouralTransaction.Items.length + ")" + " businessId: "  + businessId)
 
         } catch (error) {
             logger.error(error)

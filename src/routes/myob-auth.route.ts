@@ -133,7 +133,6 @@ router.get('/login/callback', async (req: Request, res: Response) => {
 
         const queryCode: string = req.query.code! as string;
         if (queryCode) {
-            console.log('Get the queryCode Done!!!');
             let buff = Buffer.from(queryCode);
             const buffString:any = buff.toString('ascii');
             const code:any = buffString.replace(/\s+/g,'');
