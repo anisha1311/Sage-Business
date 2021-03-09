@@ -29,9 +29,9 @@ export class JournalTransactionParser {
         }
     }
     /**
-     * Parse the Customer
+     * Parse the Customer 
      * @param account 
-     * @param businessId 
+     * @param businessId   
      */
     parse(journalTransaction: any, businessId: string) {
         let parseData = {
