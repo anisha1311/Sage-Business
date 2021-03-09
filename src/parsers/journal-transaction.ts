@@ -10,7 +10,7 @@ export class JournalTransactionParser {
      */
      public parseJournalTransaction(journalTransactionInfo: any, businessId: string) {
         try {
-            let parsedJournalTransactions: any = [];
+             let parsedJournalTransactions: any = [];
             let length = journalTransactionInfo.Items.length || 0;
             if (journalTransactionInfo && length > 0) {
                 for (let i = 0; i < length; i++) {
