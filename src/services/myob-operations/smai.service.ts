@@ -4,46 +4,38 @@ import { CompanyParser } from 'src/parsers/company';
 import { ItemParser } from 'src/parsers/item';
 import { InvoiceBillParser } from 'src/parsers/invoice';
 import { PaymentParser } from 'src/parsers/payment';
-import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
 import { JournalTransactionParser } from 'src/parsers/journal-transaction';
 import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import { AccessTokenParser } from 'src/parsers/access-tokens';
-import { ContactType } from '@shared/enums/contact-type-enum';
 import { ChartOfAccountParser } from 'src/parsers/account';
 import { EntityType } from '@shared/enums/entity-type-enum';
 import { OperationType } from '@shared/enums/operation-type-enum';
 import { QueueHandler } from '@shared/queues';
 import logger from '@shared/logger';
-import moment from 'moment';
-import { addMonths, getDateByAddingSeconds, getThreeYearAgoDate, stringFormat } from '@shared/functions';
-import { isArray } from 'util';
-//import moment_tz from 'moment-timezone';
+import {getThreeYearAgoDate} from '@shared/functions';
 import { Constant } from '@shared/constants';
-import { DateFormat, TimeUnitKeys } from '@shared/enums/comman-enum';
 import { CommanAPIService } from '@shared/api-service';
 import { MonthlReloadService } from './reload.service';
-import { ReloadServiceKeys } from '@shared/enums/reload-enum';
-import { start } from 'repl';
-import { before, constant, last } from 'lodash';
 
 const httpService = new HTTPService()
 const myobDataReaderService = new MyobDataReaderService();
 const myobConnectionService = new MyobConnectionService();
-
 let apisvc = new CommanAPIService() 
 const reloadsbc = new MonthlReloadService()
 
 export class SmaiBusinessService {
-    public accessTokens: any = '';
-    public companyExist: any = false;
+    public accessTokens: any = ''; /*Global Varibale to get the access token details */
+    public companyExist: any = false; /*Global Varibale to set when the company already exist */
     /**
      * will post add Business Info to smai-Business-service
+     * @param code 
      */
     async saveBusiness(code: string) {
         try {
             // Get access token from myob 
             this.accessTokens = await myobConnectionService.getTokens(code);
+             // Fetch company information
             let companyInfo = await myobDataReaderService.getCompanyInfo(this.accessTokens.access_token);
             if(companyInfo){
                 let length = companyInfo.length || 0;
@@ -60,8 +52,8 @@ export class SmaiBusinessService {
                             "address": companyAddress,
                             "token": parsedAccessToken
                         }
-                        let response = await httpService.post(Constant.urlConstant.serviceUrl.businessUrl, requestBody);   
-                        
+                         // Call business service API to save business
+                        let response = await httpService.post(Constant.urlConstant.serviceUrl.businessUrl, requestBody);                           
                         // Check for response form business service
                         if (response.data.status == false) {
                             try {
@@ -72,52 +64,41 @@ export class SmaiBusinessService {
                             }
                             throw new Error(Constant.busResMsg.businessConnectFailed)
                         }
-                        if (response.data.status) {
-                            let business = response.data.data;  
+                        if (response.data.status) {     
+                            let business = response.data.data;   
                             // Business already exist relaod the businesss
-                            if (response.data.data && this.companyExist && this.companyExist === true) {
+                            if (response.data.data && this.companyExist && this.companyExist === true) {                                                                                                              
                                 console.log('Compnay already exists');
                                 await reloadsbc.reloadCompany(business.syncDate, business.id, business.businessPlateformId, false)
 
                             } else {                              
-                                    // New business saved
+                                // New business saved
                                 console.log('New company')
                                 let businessId = response.data.data.id; 
                                 let realmId = response.data.data.businessPlateformId;
-                                console.log('For Company ', realmId);
-                                let currentDate = new Date();
+                                console.log('For MYOB Company ', realmId);
                                 let onBoardDate = getThreeYearAgoDate().toString();
                                 
-                                //******** GET ALL CHART OF ACCOUNT */    
-                               // console.log('Customer OnBoarding Start');
+                                //******** GET ALL CUSTOMERS-VENDORS-EMPLOYEE-PERSONAL */    
                                 await this.getContacts(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                   //******** GET ALL accounts Data */
-                                   //console.log('accounts OnBoarding Start');
+                                   //******** GET ALL ACCOUNTS */
                                 await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                   //******** GET ALL item Data */
-                                   //console.log('item OnBoarding Start');
+                                   //******** GET ALL ITEMS */
                                 await this.getItemsData(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                   //******** GET ALL invoice Data */
-                                   //console.log('invoice OnBoarding Start');
+                                   //******** GET ALL INVOICE-BILLS */
                                 await this.getInvoicesData(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                   //******** GET ALL customer payment Data */
-                                   //console.log('customer payment OnBoarding Start');
+                                   //******** GET ALL CUSTOMER PAYMENT-SUPPLIER PAYMENT */
                                 await this.getPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                     //******** GET ALL Journal	transaction Data */
-                                   //console.log('Journal transaction OnBoarding Start');
+                                     //******** GET ALL JOURNAL TRANSACTION */
                                 await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
 
-                                //this.saveCompanyData(realmId, accessTokens.access_token, accessTokens.refresh_token,businessId, this.lastCalloutDate);
                                 let companydata = parsedCompany as any;
                                 companydata.businessId = businessId;
-
-                                //return { status: true, data: response.data.data, message: Constant.busResMsg.addBusiness }
-
                             }
                         } else {
                             console.log('Empty response')
@@ -135,14 +116,21 @@ export class SmaiBusinessService {
         }
     }
      /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save contact data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getContacts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
        await this.saveContacts(accessTokens, businessId, realmId, updated_or_created_since)
     }
-    
-    /**
-     * Will parse and get customer
+      /**
+      * Will parse and get contacts
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
      async saveContacts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
@@ -183,7 +171,7 @@ export class SmaiBusinessService {
             }
 
             let employees:any;
-            // Call myob api to fetch vendors
+            // Call myob api to fetch employees
             employees = await myobDataReaderService.getAllEmployees(accessTokens.access_token, realmId, updated_or_created_since); 
             if(employees === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
@@ -226,20 +214,23 @@ export class SmaiBusinessService {
         }
     }
 
-    
     /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save account data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getAccountData(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         await this.saveAccounts(accessTokens, businessId, realmId, updated_or_created_since)
      }
 
-
-      /**
-     * Will parse and get contact
-     * @param accessToken 
-     * @param calloutUri 
+  /**
+      * Will parse and get accounts
+     * @param accessTokens 
      * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async saveAccounts(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
@@ -268,17 +259,22 @@ export class SmaiBusinessService {
 
 
     /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save item data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getItemsData(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         await this.saveItems(accessTokens, businessId, realmId, updated_or_created_since)
      }
 
-      /**
-     * Will parse and get contact
-     * @param accessToken 
-     * @param calloutUri 
+    /**
+      * Will parse and get items
+     * @param accessTokens 
      * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async saveItems(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
@@ -308,21 +304,29 @@ export class SmaiBusinessService {
 
 
     /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save invoice data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getInvoicesData(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         await this.saveInvoices(accessTokens, businessId, realmId, updated_or_created_since)
      }
 
-      /**
-     * Will parse and get contact
+    /**
+      * Will parse and get invoice
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async saveInvoices(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
             let invoiceBillData: any = [];
             let totalLength = 0;
             let invoices:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch invoices
             invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since); 
  
             if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
@@ -340,7 +344,7 @@ export class SmaiBusinessService {
             }
 
             let bills:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch bills
             bills = await myobDataReaderService.getAllBills(accessTokens.access_token, realmId, updated_or_created_since);
             if(bills === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
@@ -367,24 +371,28 @@ export class SmaiBusinessService {
     }
 
     /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save payments data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getPaymentData(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         await this.savePayments(accessTokens, businessId, realmId, updated_or_created_since)
      }
-    
-       /**
-     * Will parse and get contact
-     * @param accessToken 
-     * @param calloutUri 
+     /**
+      * Will parse and get payments
+     * @param accessTokens 
      * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async savePayments(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         try {
             let paymentsData:any = [];
             let totalLength = 0;
             let customerPayments:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch customer payment
             customerPayments = await myobDataReaderService.getAllCustomerPayments(accessTokens.access_token, realmId, updated_or_created_since);
             if(customerPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
@@ -401,7 +409,7 @@ export class SmaiBusinessService {
             }
 
             let supplierPayments:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch supplier payment
             supplierPayments = await myobDataReaderService.getAllSupplierPayments(accessTokens.access_token, realmId, updated_or_created_since);
             if(supplierPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
@@ -427,24 +435,28 @@ export class SmaiBusinessService {
         }    
     }
    
-
     /**
-     * will fetch and save company data over successfully load company
+     * will fetch and save journal transaction data over successfully load company
+     * @param accessTokens 
+     * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async getJournalTransaction(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
         await this.saveJournalTransaction(accessTokens, businessId, realmId, updated_or_created_since)
     }
    /**
-     * Will parse and get contact
-     * @param accessToken 
-     * @param calloutUri 
+      * Will parse and get journal transaction
+     * @param accessTokens 
      * @param businessId 
+     * @param realmId 
+     * @param updated_or_created_since 
      */
     async saveJournalTransaction(accessTokens: any, businessId: string, realmId: string, updated_or_created_since: string) {
 
         try {
             let jouralTransaction:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch journal transaction
             jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);
             if(jouralTransaction === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
@@ -457,7 +469,7 @@ export class SmaiBusinessService {
             } 
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
-                this.prepareAndSendQueueData(EntityType.transactions, OperationType.CREATE, businessId, parsedJournalTransactions);               
+                this.prepareAndSendQueueData(EntityType.jv, OperationType.CREATE, businessId, parsedJournalTransactions);               
             }
             logger.info("journal transaction Fetched: (" + jouralTransaction.Items.length + ")" + " businessId: "  + businessId)
         } catch (error) {       
@@ -465,9 +477,9 @@ export class SmaiBusinessService {
         } 
     }
     /** Will Prepare and send data to queue
-     * @param CONTACT 
-     * @param CREATE 
-     * @param parsedContacts 
+     * @param entityType 
+     * @param operationType 
+     * @param businessId 
      */
     prepareAndSendQueueData(entityType: EntityType, operationType: OperationType, businessId: string, data: []) {        
         if (data && data.length == 0) {

@@ -1,9 +1,6 @@
-import * as data from '../shared/data/chartofAccounts.json'
-import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class ContactParser {
     /**
      * will parse the Customers
@@ -45,19 +42,19 @@ export class ContactParser {
             const contactAddress : any = {};
             const contactPhone : any = {};
             contactAddress['businessId'] = businessId,
-            contactAddress['addressType'] =  1,
+            contactAddress['addressType'] = i==0 ? '1' : '2',
             contactAddress['addressLine1'] = contact.Addresses[i].Street !== ''? contact.Addresses[i].Street : ' ', 
             contactAddress['addressLine2'] = ' ',
             contactAddress['status'] = 1,
             contactAddress['city'] = contact.Addresses[i].City !== '' ? contact.Addresses[i].City :  ' ',
             contactAddress['postalCode']    = contact.Addresses[i].Postcode  !== '' ? contact.Addresses[i].Postcode :  ' ',
             contactAddress['state'] =  contact.Addresses[i].State !== '' ? contact.Addresses[i].State : ' ',
-            contactAddress['country'] =  contact.Addresses[i].Country !== '' ? contact.Addresses[i].Country : ' ',
-            contactAddresses.push(contactAddress);
+            contactAddress['country'] =  contact.Addresses[i].Country !== '' ? contact.Addresses[i].Country : ' ',            
             contactPhone['businessId'] = businessId,
             contactPhone['phoneType']    = 1, 
-            contactPhone['phoneNumber'] = '1', //customer.Addresses[i] != null && customer.Addresses[i].Phone1 != null ? customer.Addresses[i].Phone1 +'': '1', 
-            contactPhone['status'] = 1,        
+            contactPhone['phoneNumber'] = contact.Addresses[i].Phone1 + '; ' + contact.Addresses[i].Phone2 + '; '+ contact.Addresses[i].Phone3, 
+            contactPhone['status'] = 1,       
+            contactAddresses.push(contactAddress); 
             contactPhones.push(contactPhone);
         }
         parseData = {

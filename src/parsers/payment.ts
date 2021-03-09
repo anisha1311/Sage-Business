@@ -1,9 +1,6 @@
-import * as data from '../shared/data/chartofAccounts.json'
-import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 var dateFormat = require('dateformat');
 export class PaymentParser {
     /**
@@ -46,15 +43,15 @@ export class PaymentParser {
         }
         let parseData = {
             "businessId" : businessId,
-            "transactionId" : '1', //customerPayment.TransactionUID !== null ? customerPayment.TransactionUID : '1', //hardcoded
-            "paymentId" :  payment.UID !== null ? payment.UID : ' ', 
-            "paidDate" :   payment.Date !== null ? paymentDate : '1994-10-13',
-            "active" :  true,
-            "transactionType" : label== 'customerPayments'? 'Invoice': 'Bill', //customerPayment.Invoices.Type !== null ? customerPayment.Invoices.Type :
-            "refNumber" : label== 'customerPayments'? payment.ReceiptNumber !== null ?payment.ReceiptNumber : ' ' : payment.PaymentNumber !== null ? payment.PaymentNumber : '',
-            "contactId" : label== 'customerPayments'? payment.Customer!== null ? payment.Customer.UID : ' ' : payment.Supplier!== null ? payment.Supplier.UID : '',
-            "bankId" : ' ',
             "amount" : label== 'customerPayments'? payment.AmountReceived !== null ? payment.AmountReceived : ' ' : payment.AmountPaid !== null || payment.AmountPaid !== '' ? payment.AmountPaid : 0,
+            "transactionId" : payment.TransactionUID !== '' ? payment.TransactionUID+'' : 'null',
+            "transactionType" : label== 'customerPayments'? 'Invoice': 'Bill', 
+            "refNumber" : label== 'customerPayments'? payment.ReceiptNumber !== null ? payment.ReceiptNumber : ' ' : payment.PaymentNumber !== null ? payment.PaymentNumber : ' ',
+            "paymentId" :  payment.UID !== null ? payment.UID : ' ', 
+            "paidDate" :   payment.Date !== null ? paymentDate : ' ',
+            "contactId" : label== 'customerPayments'? payment.Customer!== null ? payment.Customer.UID : ' ' : payment.Supplier!== null ? payment.Supplier.UID : '',
+            "bankId" : ' ',            
+            "active" :  true,                    
         }
         return parseData;
     }

@@ -1,9 +1,6 @@
-import * as data from '../shared/data/chartofAccounts.json'
-import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 export class ItemParser {
     /**
      * will parse the Customers
@@ -41,15 +38,15 @@ export class ItemParser {
         let parseData = {
             "businessId" : businessId,
             "platformId" : item.UID,
-            "name" :  item.Name,
+            "name" :  item.Name || ' ',
             "type" :  ' ',
-            "fullName" :  item.Name,
-            "salePrice" :  item.BaseSellingPrice !== null || item.BaseSellingPrice !== '' ? item.BaseSellingPrice : 1, //hardcoded
-            "purchasePrice" : item.LastPurchasePrice !== undefined ? item.LastPurchasePrice : 1, //hardcoded
+            "fullName" :  item.Name || ' ',
+            "salePrice" : item.SellingDetails != null ? item.SellingDetails.BaseSellingPrice != null ? item.SellingDetails.BaseSellingPrice : 0 : 0, 
+            "purchasePrice" : item.BuyingDetails != null ? item.BuyingDetails.LastPurchasePrice != null ? item.BuyingDetails.LastPurchasePrice : 0 : 0, 
             "isSold" :  item.IsSold,
             "isPurchased" :  item.IsBought,
-            "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : '1', //hardcoded
-            "expenseAccRefId" :  item.ExpenseAccount !== null ? item.ExpenseAccount.UID : '1', //hardcoded
+            "incomeAccRefId" :  item.IncomeAccount !== null ? item.IncomeAccount.UID : ' ', 
+            "expenseAccRefId" :  item.ExpenseAccount !== null ? item.ExpenseAccount.UID : ' ', 
         }
         return parseData;
     }

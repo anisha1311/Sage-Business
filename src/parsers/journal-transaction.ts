@@ -1,9 +1,6 @@
-import * as data from '../shared/data/chartofAccounts.json'
-import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
 var dateFormat = require('dateformat');
 export class JournalTransactionParser {
     /**
@@ -37,18 +34,17 @@ export class JournalTransactionParser {
      * @param businessId 
      */
     parse(journalTransaction: any, businessId: string) {
-       
         let parseData = {
             "businessId" : businessId,
-            "journalDate" : '2021-02-02', //journalTransaction.DatePosted
+            "journalDate" : dateFormat(journalTransaction.DateOccurred, "yyyy-mm-dd"),
             "transactionId" :  journalTransaction.UID,
-            "transactionType" : journalTransaction.Lines !== null ? journalTransaction.Lines.SourceTransaction.TransactionType : 'CashPayment',
-            "number" :  1, //hardcoded
-            "contactId" : 'hhh', //hardcoded,
-            "description" : journalTransaction.Description !== undefined ? journalTransaction.Description : 'description',
-            "accountId" : journalTransaction.Lines.Account.UID !== undefined ? journalTransaction.Lines.Account.UID : 1,
-            "amount" : journalTransaction.Lines.Amount !== undefined ? journalTransaction.Lines.Amount : 1,
-            "isReconciled" :  true,
+            "transactionType" : journalTransaction.SourceTransaction !== null ? journalTransaction.SourceTransaction.TransactionType : ' ',
+            "number" :  " ", //numbers coming in array in Lines items
+            "contactId" : ' ', //display coming in array in Lines items
+            "description" : ' ', //description coming in array in Lines items
+            "accountId" : ' ', //accountIds coming in array in Lines items
+            "amount" : '0', //amount coming in array in Lines items
+            "isReconciled" : journalTransaction.ReconciledDate!= null ? true : false//amount coming in array in Lines items
         }
         return parseData;
     }

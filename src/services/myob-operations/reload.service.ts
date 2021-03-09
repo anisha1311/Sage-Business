@@ -10,16 +10,14 @@ import { OperationType } from '@shared/enums/operation-type-enum';
 import { ChartOfAccountParser } from 'src/parsers/account';
 import { QueueDataHandler } from '@shared/queue-data-service';
 import { ContactParser } from 'src/parsers/contact';
-import { CompanyParser } from 'src/parsers/company';
 import { ItemParser } from 'src/parsers/item';
 import { InvoiceBillParser } from 'src/parsers/invoice';
 import { HTTPService } from '@shared/http-service';
 import { PaymentParser } from 'src/parsers/payment';
-import { SupplierPaymentParser } from 'src/parsers/supplier-payment';
-import { stringFormat } from '@shared/functions';
 import { Constant } from '@shared/constants';
 import {  ReloadType } from '@shared/enums/comman-enum';
 import { ReloadServiceKeys } from '@shared/enums/reload-enum';
+
 const httpService = new HTTPService()
 let apisvc = new CommanAPIService()
 const myobDataReaderService = new MyobDataReaderService();
@@ -37,9 +35,8 @@ export class MonthlReloadService {
         try {
           // Convert date into required format
           let syncDate = moment(date, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]').subtract(2, 'minutes').format('YYYY-MM-DD[T]HH:mm:ss-00:00');
-          this.tokenResponse = await apisvc.getAccessToken(realmId);
-        //  let accessTokenUrl: string = stringFormat(Constant.urlConstant.serviceUrl.accessTokenUrl, [realmId]) 
-       
+          // Get access token
+          this.tokenResponse = await apisvc.getAccessToken(realmId);       
           if (this.tokenResponse.data && this.tokenResponse.status === true) {
               console.log('Token data recieved')
               if (isMonthlyReload) {
@@ -82,10 +79,15 @@ export class MonthlReloadService {
         await this.fetchInvoices(syncDate, tokenResponse, realmId, businessId);
         await this.fetchItems(syncDate, tokenResponse, realmId, businessId);
         await this.fetchJournalTransaction(syncDate, tokenResponse, realmId, businessId);
+
     }
 
     /**
-     * Fetch Customer from MYOB CDC API 
+     * Fetch customer,vendor, employee, personal from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
     async fetchContacts(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
@@ -127,7 +129,7 @@ export class MonthlReloadService {
             }
 
             let employees:any;
-            // Call myob api to fetch vendors
+            // Call myob api to fetch employees
             employees = await myobDataReaderService.getAllEmployees(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
             if(employees === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
@@ -171,9 +173,12 @@ export class MonthlReloadService {
     }
 
 
-
-      /**
-      * Fetch Accounts from MYOB CDC API 
+     /**
+     * Fetch account from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
     async fetchAccounts(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
@@ -199,8 +204,13 @@ export class MonthlReloadService {
             logger.error(error)
         }
     }
-   /**
-     * Fetch Items from MYOB CDC API 
+   
+     /**
+     * Fetch items from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
     async fetchItems(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
@@ -227,8 +237,13 @@ export class MonthlReloadService {
             logger.error(error)
         }
     }
+     
      /**
-     * Fetch Invoices from MYOB CDC API 
+     * Fetch invoices from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
       async fetchInvoices(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
@@ -236,7 +251,7 @@ export class MonthlReloadService {
             let invoiceBillData: any = [];
             let totalLength = 0;
             let invoices:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch invoices
             invoices = await myobDataReaderService.getAllInvoices(tokenResponse.data.accessToken, realmId, updated_or_created_since); 
  
             if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
@@ -254,7 +269,7 @@ export class MonthlReloadService {
             }
 
             let bills:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch bills
             bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);
             if(bills === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
@@ -281,8 +296,12 @@ export class MonthlReloadService {
         }
     }
 
-        /**
-     * Fetch CustomerPayments from MYOB CDC API 
+     /**
+     * Fetch payment from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
     async fetchPayments(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
@@ -290,7 +309,7 @@ export class MonthlReloadService {
             let paymentsData:any = [];
             let totalLength = 0;
             let customerPayments:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch customer payment
             customerPayments = await myobDataReaderService.getAllCustomerPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
             if(customerPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
@@ -307,7 +326,7 @@ export class MonthlReloadService {
             }
 
             let supplierPayments:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch supplier payment
             supplierPayments = await myobDataReaderService.getAllSupplierPayments(tokenResponse.data.accessToken, realmId, updated_or_created_since);
             if(supplierPayments === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refreshToken);
@@ -333,18 +352,18 @@ export class MonthlReloadService {
         }
     }
 
-   
-
-     
-
- /**
-     * Fetch Customer from MYOB CDC API 
+   /**
+     * Fetch journal transaction from Qb CDC API
+     * @param updated_or_created_since 
+     * @param tokenResponse 
+     * @param realmId 
+     * @param businessId 
      */
     async fetchJournalTransaction(updated_or_created_since: string, tokenResponse: any, realmId: string, businessId: string) {
 
         try {
             let jouralTransaction:any;
-            // Call myob api to fetch items
+            // Call myob api to fetch journal transaction
             jouralTransaction = await myobDataReaderService.getAllJournalTransactions(tokenResponse.data.accessToken, realmId, updated_or_created_since);
             if(jouralTransaction === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(tokenResponse.data.refresh_token);
@@ -357,7 +376,7 @@ export class MonthlReloadService {
             } 
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
-                QueueDataHandler.prepareAndSendQueueData(EntityType.transactions, OperationType.REPLACE, businessId, parsedJournalTransactions);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.jv, OperationType.REPLACE, businessId, parsedJournalTransactions);
             }
             logger.info("journal transaction Reloaded: (" + jouralTransaction.Items.length + ")" + " businessId: "  + businessId)
 

@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
 import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+import moment from 'moment';
 var dateFormat = require('dateformat');
 export class InvoiceBillParser {
     /**
@@ -40,8 +41,8 @@ export class InvoiceBillParser {
      * @param businessId 
      */
     parse(invoiceBill: any, businessId: string, label:any) {
-        let invoiceBillDate : any;
-        let promiseDate : any;
+        let invoiceBillDate : any = '';
+        let promiseDate : any = '';
         var lines: any = [];
         if(invoiceBill.Date !== null){
             invoiceBillDate = dateFormat(invoiceBill.Date, "yyyy-mm-dd");
@@ -50,16 +51,14 @@ export class InvoiceBillParser {
             promiseDate = dateFormat(invoiceBill.PromisedDate, "yyyy-mm-dd");
         }
         if(invoiceBill.Lines !== null) { 
-            for (var i = 0; i<invoiceBill.Lines.length; i++)
-            {
+            for (var i = 0; i<invoiceBill.Lines.length; i++) {
                 var line: any = {};
-                line['description'] = invoiceBill.Lines[i].Description !== null ? invoiceBill.Lines[i].Description : '1',
+                line['description'] = invoiceBill.Lines[i].Description !== null && invoiceBill.Lines[i].Description !== '' ? invoiceBill.Lines[i].Description : 'not allowed to be empty',
                 line['itemId'] = invoiceBill.Lines[i].Item !== null ? invoiceBill.Lines[i].Item.UID : ' ';               
                 line['lineNumber'] = i+1+'';
                 line['lineAmount'] = invoiceBill.Lines[i].CostOfGoodsSold;     
                 line['quantity'] = invoiceBill.Lines[i].ShipQuantity;  
-                line['quantity'] = invoiceBill.Lines[i].ShipQuantity;  
-                line['accountCode'] = label==invoiceBill ? invoiceBill.Lines[i].Item.Number : ' '; 
+                line['accountCode'] =  invoiceBill.Lines[i].Item !== null ? invoiceBill.Lines[i].Item.Number : ' '; 
                 line['unitPrice'] = invoiceBill.Lines[i].UnitPrice;
                 lines.push(line);
             }    
@@ -68,15 +67,15 @@ export class InvoiceBillParser {
         let parseData = {
             //'businessId': businessId,
             "number" : invoiceBill.Number,
-            "date" : invoiceBillDate !== null || invoiceBillDate !== '' ? invoiceBillDate : '1994-10-10', 
-            "dueDate" : promiseDate || '2020-09-09',
+            "date" : invoiceBillDate !== '' ? invoiceBillDate : moment(Date.now()).format('YYYY-MM-DD'), 
+            "dueDate" : promiseDate !== '' ? promiseDate : moment(Date.now()).format('YYYY-MM-DD'),
             "trackingNo" :  ' ', 
             "totalLineItem" :  invoiceBill.Lines.length, 
-            "lineAmountType" : 1, 
+            "lineAmountType" : '1',  //ITS must be a number
             "amount" :  invoiceBill.TotalAmount,
             "balance" :  invoiceBill.BalanceDueAmount,
             "totalTax" : invoiceBill.TotalTax,
-            "platformId" :  invoiceBill.UID !== null ? invoiceBill.UID : ' ',
+            "platformId" :  invoiceBill.UID ||  ' ',
             "type" : label == 'invoiceBill'? '1' :'4',
             "lines" :  lines,
             "currency" : invoiceBill.ForeignCurrency || ' '

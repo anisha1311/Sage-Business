@@ -1,15 +1,9 @@
 import '../loadenv';
 import { Request, Response, Router } from 'express';
 import { OK, INTERNAL_SERVER_ERROR, BAD_REQUEST } from 'http-status-codes';
-import { MyobConnectionService } from 'src/services/myob-operations/myob-connection.service';
 import { SmaiBusinessService } from 'src/services/myob-operations/smai.service';
 import logger from '@shared/logger';
-import { TimeZone } from '@shared/enums/comman-enum';
-import { ConnectBusinessSchema } from 'src/requests/business-connect.request';
 import { Constant } from '@shared/constants';
-import { stringFormat } from '@shared/functions';
-import { RefteshTokenSchema } from 'src/requests/refresh-token.request';
-const myobConnectionService = new MyobConnectionService();
 const smaiBusinessService = new SmaiBusinessService();
 const router = Router();
 
