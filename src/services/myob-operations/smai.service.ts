@@ -355,7 +355,7 @@ export class SmaiBusinessService {
                 }
                 bills = await myobDataReaderService.getAllBills(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
-            if (bills.Items.length != 0) {
+            if (bills.Items.length != 0) {  
                 totalLength += bills.Items.length;
                 invoiceBillData.push({value: bills , label: 'bill'})
             }

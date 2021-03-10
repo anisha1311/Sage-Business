@@ -277,7 +277,7 @@ export class MonthlReloadService {
                     apisvc.formatTokens(response, realmId);
                     this.tokenResponse = response;
                     tokenResponse = this.tokenResponse;
-                }
+                }  
                 bills = await myobDataReaderService.getAllBills(tokenResponse.data.accessToken, realmId, updated_or_created_since);    
             } 
             if (bills.Items.length != 0) {
