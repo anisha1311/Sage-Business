@@ -104,14 +104,14 @@ export const Constant = {
             customerPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/CustomerPayment/?$filter=Date ge datetime\'{1}\'', //and Date le datetime\'{2}\'
             vendorPaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/SupplierPayment/?$filter=Date ge datetime\'{1}\'', // and Date le datetime\'{2}\'
             employeePaymentUrl: process.env.MYOB_API_URL + '/accountright/{0}/Contact/EmployeePaymentDetails/?$filter=Date ge datetime\'{1}\'', // and Date le datetime\'{2}\'
-            invoiceUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/Invoice/Item/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
-            billUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/Bill/Item/?$filter=LastModified ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
+            invoiceUrl: process.env.MYOB_API_URL + '/accountright/{0}/Sale/Invoice/?$filter=LastModified ge datetime\'{1}\'', // and LastModified le datetime\'{2}\'
+            billUrl: process.env.MYOB_API_URL + '/accountright/{0}/Purchase/Bill/?$filter=Date ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
             journalUrl:process.env.MYOB_API_URL + '/accountright/{0}/GeneralLedger/JournalTransaction/?$filter=JournalType eq \'General\' and DateOccurred ge datetime\'{1}\'', //and LastModified le datetime\'{2}\'
         }
     },
     parserMsg: {
         parseAccessTokenError: 'failed to parse Access Token data',
-        parseAccountsError: 'failed to parse Chart of Accounts data',
+        parseAccountsError: 'failed to parse data',
         parseArAgingError: 'failed to parse AR AGING data',
         parseApAgingError: 'failed to parse AP AGING data',
         parseJvError: 'failed to parse JV data',

@@ -1,18 +1,17 @@
-import * as data from '../shared/data/chartofAccounts.json'
-import * as subaccounttypesdata from '../shared/data/sub-account-types.json'
 import * as _ from 'lodash'
 import logger from '@shared/logger';
 import { Constant } from '@shared/constants';
-import { ChartOfAccountKeys } from '@shared/enums/parser-enum';
+import { MyobDataReaderService } from 'src/services/myob-operations/myob-data-reader.service';
 import moment from 'moment';
 var dateFormat = require('dateformat');
+const myobDataReaderService = new MyobDataReaderService();
 export class InvoiceBillParser {
     /**
      * will parse the invoices
      * @param invoiceInfo 
      * @param businessId 
      */
-     public parseInvoiceBills(invoiceBillInfo: any, businessId: string) {
+     async parseInvoiceBills(invoiceBillInfo: any, access_token: string, businessId: string) {
         try {
             let parsedInvoicesBills: any = [];
             let length = invoiceBillInfo.length || 0;
@@ -20,8 +19,10 @@ export class InvoiceBillParser {
                 //let parsedInvoices: any = [];
                 for (let i = 0; i < length; i++) {
                     for(let invoiceIndex = 0;invoiceIndex < invoiceBillInfo[i].value.Items.length; invoiceIndex++){
+                        let serviceURI = invoiceBillInfo[i].value.Items[invoiceIndex].URI;
+                        let lineItems = await myobDataReaderService.getAllInvoiceItems(access_token,serviceURI);
                         const invoiceBill = invoiceBillInfo[i].value.Items[invoiceIndex];
-                        parsedInvoicesBills.push(this.parse(invoiceBill, businessId, invoiceBillInfo[i].label))
+                        parsedInvoicesBills.push(this.parse(invoiceBill, businessId, lineItems, invoiceBillInfo[i].label))
                     }
                 }                
                 return parsedInvoicesBills;
@@ -40,7 +41,7 @@ export class InvoiceBillParser {
      * @param account 
      * @param businessId 
      */
-    parse(invoiceBill: any, businessId: string, label:any) {
+    parse(invoiceBill: any, businessId: string, lineItems: any, label:any) {
         let invoiceBillDate : any = '';
         let promiseDate : any = '';
         var lines: any = [];
@@ -50,17 +51,18 @@ export class InvoiceBillParser {
         if(invoiceBill.PromisedDate !==null && promiseDate !== undefined){
             promiseDate = dateFormat(invoiceBill.PromisedDate, "yyyy-mm-dd");
         }
-        if(invoiceBill.Lines !== null) { 
-            for (var i = 0; i<invoiceBill.Lines.length; i++) {
+        if(lineItems.Lines !== null) { 
+            for (var i = 0; i<lineItems.Lines.length; i++) {
                 var line: any = {};
-                line['description'] = invoiceBill.Lines[i].Description !== null && invoiceBill.Lines[i].Description !== '' ? invoiceBill.Lines[i].Description : 'not allowed to be empty',
-                line['itemId'] = invoiceBill.Lines[i].Item !== null ? invoiceBill.Lines[i].Item.UID : ' ';               
-                line['lineNumber'] = i+1+'';
-                line['lineAmount'] = invoiceBill.Lines[i].CostOfGoodsSold;     
-                line['quantity'] = invoiceBill.Lines[i].ShipQuantity;  
-                line['accountCode'] =  invoiceBill.Lines[i].Item !== null ? invoiceBill.Lines[i].Item.Number : ' '; 
-                line['unitPrice'] = invoiceBill.Lines[i].UnitPrice;
+                line['description'] = lineItems.Lines[i].Description !== null && lineItems.Lines[i].Description !== '' ? lineItems.Lines[i].Description : 'not allowed to be empty',
+                line['itemId'] = ' ';               
+                line['lineNumber'] =  lineItems.Lines[i].RowID !== null ? lineItems.Lines[i].RowID : ' ';    
+                line['lineAmount'] = lineItems.Lines[i].Total;     
+                line['quantity'] = lineItems.Lines[i].UnitCount;  
+                line['accountCode'] =  lineItems.Lines[i].Account !== null ? lineItems.Lines[i].Account.DisplayID : ' '; 
+                line['unitPrice'] = lineItems.Lines[i].UnitPrice;
                 lines.push(line);
+                
             }    
         }
            
@@ -68,17 +70,17 @@ export class InvoiceBillParser {
             //'businessId': businessId,
             "number" : invoiceBill.Number,
             "date" : invoiceBillDate !== '' ? invoiceBillDate : moment(Date.now()).format('YYYY-MM-DD'), 
-            "dueDate" : promiseDate !== '' ? promiseDate : moment(Date.now()).format('YYYY-MM-DD'),
+            "dueDate" : promiseDate !== null ? promiseDate : moment(Date.now()).format('YYYY-MM-DD'),
             "trackingNo" :  ' ', 
-            "totalLineItem" :  invoiceBill.Lines.length, 
-            "lineAmountType" : '1',  //ITS must be a number
+            "totalLineItem" :  lines.length, 
+            "lineAmountType" : '1',  //In ITS, It must be a number
             "amount" :  invoiceBill.TotalAmount,
             "balance" :  invoiceBill.BalanceDueAmount,
             "totalTax" : invoiceBill.TotalTax,
             "platformId" :  invoiceBill.UID ||  ' ',
-            "type" : label == 'invoiceBill'? '1' :'4',
+            "type" : label == 'invoice'? '1' :'4',            
+            "currency" : invoiceBill.ForeignCurrency || ' ',
             "lines" :  lines,
-            "currency" : invoiceBill.ForeignCurrency || ' '
         }
         return parseData;
     }

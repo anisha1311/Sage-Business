@@ -133,7 +133,7 @@ export class MyobDataReaderService {
             // Make myob api call
             let response:any = await this.makeApiCall(url, token);
             
-            if (response) {
+            if (response) {                
                return response;
             }
             else {
@@ -203,6 +203,21 @@ export class MyobDataReaderService {
         try {
             let url = stringFormat(Constant.urlConstant.myobUrl.journalUrl, [companyId, startDate]);
             // Make myob api call
+            let response:any = await this.makeApiCall(url, token);
+               
+            if (response) {
+               return response;
+            }
+            else {
+                throw new Error(Constant.myobDataGetFailError.failedCompanyPrefrence)
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getAllInvoiceItems(token: string, url:string): Promise<any> {
+        try {
             let response:any = await this.makeApiCall(url, token);
                
             if (response) {

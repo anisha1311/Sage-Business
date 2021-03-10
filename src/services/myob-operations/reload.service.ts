@@ -285,8 +285,8 @@ export class MonthlReloadService {
                 invoiceBillData.push({value: bills , label: 'bill'})
             }
             if(totalLength  != 0 ) {
-                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
-                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.REPLACE, businessId, parsedInvoiceBill);
+                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData,tokenResponse.data.access_token, businessId);
+                QueueDataHandler.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, await parsedInvoiceBill);
             }
             logger.info("invoices-bills Reloaded: (" + totalLength + ")" + " businessId: "  + businessId)
             

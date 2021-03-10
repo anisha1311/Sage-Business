@@ -80,22 +80,22 @@ export class SmaiBusinessService {
                                 let onBoardDate = getThreeYearAgoDate().toString();
                                 
                                 //******** GET ALL CUSTOMERS-VENDORS-EMPLOYEE-PERSONAL */    
-                                await this.getContacts(this.accessTokens, businessId, realmId, onBoardDate);
+                               // await this.getContacts(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL ACCOUNTS */
-                                await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
+                               // await this.getAccountData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL ITEMS */
-                                await this.getItemsData(this.accessTokens, businessId, realmId, onBoardDate);
+                              //  await this.getItemsData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL INVOICE-BILLS */
                                 await this.getInvoicesData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                    //******** GET ALL CUSTOMER PAYMENT-SUPPLIER PAYMENT */
-                                await this.getPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
+                             //   await this.getPaymentData(this.accessTokens, businessId, realmId, onBoardDate);
 
                                      //******** GET ALL JOURNAL TRANSACTION */
-                                await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
+                              //  await this.getJournalTransaction(this.accessTokens, businessId, realmId, onBoardDate);
 
                                 let companydata = parsedCompany as any;
                                 companydata.businessId = businessId;
@@ -328,7 +328,7 @@ export class SmaiBusinessService {
             let invoices:any;
             // Call myob api to fetch invoices
             invoices = await myobDataReaderService.getAllInvoices(accessTokens.access_token, realmId, updated_or_created_since); 
- 
+            
             if(invoices === Constant.commanResMsg.UnauthorizedStatusCode){                
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
                 if (response.access_token) {
@@ -360,8 +360,8 @@ export class SmaiBusinessService {
                 invoiceBillData.push({value: bills , label: 'bill'})
             }
             if(totalLength  != 0 ) {
-                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData, businessId);
-                this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, parsedInvoiceBill);
+                let parsedInvoiceBill = new InvoiceBillParser().parseInvoiceBills(invoiceBillData,accessTokens.access_token, businessId);
+                this.prepareAndSendQueueData(EntityType.invoice, OperationType.CREATE, businessId, await parsedInvoiceBill);
             }           
             logger.info("invoices-bills Fetched: (" + totalLength + ")" + " businessId: "  + businessId)
            
