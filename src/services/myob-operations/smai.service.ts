@@ -464,7 +464,7 @@ export class SmaiBusinessService {
                     apisvc.formatTokens(response, realmId);
                     this.accessTokens = response;  
                     accessTokens = this.accessTokens;
-                }
+                } 
                 jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);    
             } 
             if (jouralTransaction.Items.length != 0) {
