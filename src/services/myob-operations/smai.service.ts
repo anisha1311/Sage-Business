@@ -466,7 +466,7 @@ export class SmaiBusinessService {
                     accessTokens = this.accessTokens;
                 } 
                 jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);    
-            } 
+            }   
             if (jouralTransaction.Items.length != 0) {
                 let parsedJournalTransactions = new JournalTransactionParser().parseJournalTransaction(jouralTransaction, businessId)
                 this.prepareAndSendQueueData(EntityType.jv, OperationType.CREATE, businessId, parsedJournalTransactions);               
@@ -474,7 +474,7 @@ export class SmaiBusinessService {
             logger.info("journal transaction Fetched: (" + jouralTransaction.Items.length + ")" + " businessId: "  + businessId)
         } catch (error) {       
             logger.error("journal transaction Failed:-" + error);
-        } 
+        }  
     }     
     /** Will Prepare and send data to queue 
      * @param entityType 
