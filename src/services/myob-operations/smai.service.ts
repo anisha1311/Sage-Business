@@ -476,7 +476,7 @@ export class SmaiBusinessService {
             logger.error("journal transaction Failed:-" + error);
         } 
     }     
-    /** Will Prepare and send data to queue
+    /** Will Prepare and send data to queue 
      * @param entityType 
      * @param operationType 
      * @param businessId 
