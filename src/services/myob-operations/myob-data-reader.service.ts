@@ -196,7 +196,7 @@ export class MyobDataReaderService {
         } catch (error) {
             throw error
         }
-    }
+    }  
 
 
     async getAllJournalTransactions(token: string, companyId: string, startDate:string): Promise<any> {
