@@ -204,7 +204,7 @@ export class MyobDataReaderService {
             let url = stringFormat(Constant.urlConstant.myobUrl.journalUrl, [companyId, startDate]);
             // Make myob api call
             let response:any = await this.makeApiCall(url, token);
-            
+               
             if (response) {
                return response;
             }
