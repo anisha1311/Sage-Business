@@ -462,7 +462,7 @@ export class SmaiBusinessService {
                 let response = await myobConnectionService.refreshTokensByRefreshToken(accessTokens.refresh_token);
                 if (response.access_token) {
                     apisvc.formatTokens(response, realmId);
-                    this.accessTokens = response;
+                    this.accessTokens = response;  
                     accessTokens = this.accessTokens;
                 }
                 jouralTransaction = await myobDataReaderService.getAllJournalTransactions(accessTokens.access_token, realmId, updated_or_created_since);    
