@@ -83,7 +83,7 @@ export class MonthlReloadService {
     }
 
     /**
-     * Fetch customer,vendor, employee, personal from Qb CDC API
+     * Fetch customer,vendor, employee, personal from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
@@ -174,7 +174,7 @@ export class MonthlReloadService {
 
 
      /**
-     * Fetch account from Qb CDC API
+     * Fetch account from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
@@ -206,7 +206,7 @@ export class MonthlReloadService {
     }
    
      /**
-     * Fetch items from Qb CDC API
+     * Fetch items from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
@@ -239,7 +239,7 @@ export class MonthlReloadService {
     }
      
      /**
-     * Fetch invoices from Qb CDC API
+     * Fetch invoices from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
@@ -297,7 +297,7 @@ export class MonthlReloadService {
     }
 
      /**
-     * Fetch payment from Qb CDC API
+     * Fetch payment from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
@@ -353,7 +353,7 @@ export class MonthlReloadService {
     }
 
    /**
-     * Fetch journal transaction from Qb CDC API
+     * Fetch journal transaction from MYOB CDC API
      * @param updated_or_created_since 
      * @param tokenResponse 
      * @param realmId 
