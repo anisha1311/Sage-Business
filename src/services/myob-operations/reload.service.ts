@@ -416,7 +416,7 @@ export class MonthlReloadService {
         if (businessId) {
             apisvc.syncDateWithBusinessService(businessId)
         }
-    }
+    } 
     /**
      * Verify if token can fetch data from myob
      * @param accessToken
